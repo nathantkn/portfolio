@@ -1,6 +1,7 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap'); */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap');
 
 @import "tailwindcss";
 
@@ -12,12 +13,14 @@
     font-display: block;
     src: url('/fonts/DancingScript-Regular.ttf') format('truetype');
   }
+  /* Self-hosted from `src/assets` so the hero name is fingerprinted and
+     bundled by Vite rather than served unhashed out of `public/`. */
   @font-face {
     font-family: 'Dancing Script';
     font-style: normal;
     font-weight: 700;
-    font-display: block;
-    src: url('/fonts/DancingScript-Bold.ttf') format('truetype');
+    font-display: swap;
+    src: url('../assets/fonts/DancingScript-Bold.ttf') format('truetype');
   }
   @font-face {
     font-family: 'Northwell';
@@ -415,6 +418,11 @@ body {
   --font-num: 'Instrument Serif', serif;
   --font-body: 'Space Grotesk', sans-serif;
   --font-mono: 'Space Mono', ui-monospace, monospace;
+  --font-brico: 'Bricolage Grotesque', 'Space Grotesk', sans-serif;
+
+  /* Link ink (the redesigned pages override this with the orange accent). */
+  --link: #5B8CFF;
+  --link-hover: #93B4FF;
 
   /* Height of the fixed nav — pages offset their first section by this. */
   --nav-h: 74px;
@@ -427,6 +435,18 @@ body {
   :root {
     --nav-h: 66px;
   }
+}
+
+/* --- Links --------------------------------------------------------------- */
+
+/* Wrapped in `:where()` so this is a zero-specificity fallback: any component
+   or page class that colours its own links wins without needing `!important`. */
+:where(a) {
+  color: var(--link);
+}
+
+:where(a:hover) {
+  color: var(--link-hover);
 }
 
 /* --- Page shell ---------------------------------------------------------- */

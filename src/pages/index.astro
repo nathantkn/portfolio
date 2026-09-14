@@ -1,201 +1,617 @@
 ---
-import "../styles/global.css";
-import Introduction from '../components/Introduction.astro';
-import Description from '../components/Description.astro';
-import Layout from '../layouts/Layout.astro';
-import background from '../assets/new-bg.gif';
+/**
+ * Home / about — one dark editorial page: hero, about copy, photo strip, the
+ * draggable skill cloud, and the three onward links.
+ */
+import DesignLayout from '../layouts/DesignLayout.astro';
+import WordCloud from '../components/WordCloud.astro';
+import heroBg from '../assets/new-bg.gif';
+
+const photos = [
+  { span: 4, img: '/webdev_team.jpg', caption: 'Web Dev Team, SparkHacks 2026', accent: '#C77DFF' },
+  { span: 5, img: '/wildhacks2025.jpg', caption: 'First win @ WildHacks 2025', accent: '#FF5470' },
+  { span: 3, img: '/wildhacks2026.jpg', caption: 'First place @ WildHacks 2026', accent: '#5B8CFF' },
+];
+
+const rows = [
+  {
+    href: '/projects',
+    label: 'Projects',
+    note: 'hackathon builds, research tools, production sites',
+    accent: '#FF5470',
+  },
+  { href: '/experience', label: 'Experience', note: 'engineering, research, teaching', accent: '#3DDC97' },
+  { href: '/leadership', label: 'Leadership', note: 'hackathons and student community', accent: '#5B8CFF' },
+];
 ---
 
-<div class="relative">
-    <Layout>
-        <section id="introduction" class="relative min-h-screen bg-cover bg-center bg-fixed" 
-                style={`background-image: url(${background.src});`}>
-            <div id="introduction-content" class="relative z-10 transition-opacity duration-300">
-                <Introduction />
-            </div>
-        </section>
-        
-        <section id="description" class="relative bg-gradient-to-br from-slate-900 via-gray-800 to-slate-800 overflow-hidden">
-            <div id="stars-small" class="absolute inset-0 pointer-events-none"></div>
-            <div id="stars-medium" class="absolute inset-0 pointer-events-none"></div>
-            <div id="stars-large" class="absolute inset-0 pointer-events-none"></div>
-            <div id="description-content" class="relative z-10 transition-opacity duration-300 opacity-0">
-                <Description />
-            </div>
-        </section>
-    </Layout>
-</div>
+<DesignLayout
+  title="Nathan Trinh"
+  description="Nathan Trinh — CS senior at the University of Illinois Chicago."
+  active="about"
+  flush
+  bodyClass="home"
+>
+  <main class="home-main">
+    <!-- 1. Hero -->
+    <section class="hero">
+      <div class="hero-bg" data-hero-bg style={`background-image: url(${heroBg.src});`}></div>
+      <div class="hero-scrim"></div>
 
-<script>
-    function handleScroll() {
-        const scrollY = window.scrollY;
-        const windowHeight = window.innerHeight;
-        
-        const introContent = document.getElementById('introduction-content');
-        const descContent = document.getElementById('description-content');
-        
-        if (introContent && descContent) {
-            // Calculate opacity based on scroll position
-            const introOpacity = Math.max(0, 1 - (scrollY / (windowHeight * 0.8)));
-            const descOpacity = Math.min(1, Math.max(0, (scrollY - windowHeight * 0.3) / (windowHeight * 0.5)));
-            
-            // Apply opacity changes only to content
-            introContent.style.opacity = introOpacity.toString();
-            descContent.style.opacity = descOpacity.toString();
+      <div class="hero-inner" data-hero-inner>
+        <h1 class="hero-name">Nathan Trinh</h1>
+        <p class="hero-sub">
+          Building software for <span class="hl-blue">the greater good of people</span>.
+        </p>
+        <div class="hero-cta">
+          <a class="cta cta-primary" href="/Nathan_Trinh_resume.pdf" target="_blank" rel="noopener noreferrer">
+            my resume ↗
+          </a>
+          <a class="cta cta-ghost" href="https://www.linkedin.com/in/khoi-nguyen-trinh/">get in touch</a>
+        </div>
+      </div>
+
+      <span class="scroll-cue">scroll ↓</span>
+    </section>
+
+    <!-- 2. About -->
+    <section class="sec">
+      <div class="sec-index">01 / about</div>
+      <div class="sec-body">
+        <div class="about">
+          <p class="about-lead" data-reveal>
+            I'm Nathan, a Software Engineer recently graduated from the University of Illinois Chicago.
+          </p>
+          <p data-reveal>
+            I'm currently working as a <span class="hl-blue">Startup Associate</span> at Fulcrum GT 
+            through the Startup Lab program, where I lead the production of a product at the intersection 
+            of <span class="hl-green">Media</span> and <span class="hl-red">Healthcare</span>.
+          </p>
+          <p data-reveal>
+            I was a <span class="hl-green">Teaching Assistant</span> for UIC's Data Structures class, 
+            and served as SparkHacks' 2026 <span class="hl-green">Web Development Team Lead</span>, 
+            leading the design and development of the hackathon's website and dashboard system.
+          </p>
+          <p data-reveal>
+            I'm passionate about <span class="hl-green">software engineering</span>,
+            <span class="hl-red">AI</span>, and <span class="hl-blue">full-stack/web development</span>. I
+            want to use technology to create meaningful impact, whether by building personal projects,
+            contributing to causes and communities, or leveraging the potential of AI/ML.
+          </p>
+          <p data-reveal>
+            I also enjoy participating in hackathons, having <span class="hl-amber">3 victories</span>
+            in total!
+          </p>
+          <p data-reveal>
+            I'm always looking for opportunities where I can keep growing my skills and making positive impact.
+            If you have anything in mind, I would love to hear from you through my email or LinkedIn!
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Photo strip -->
+    <section class="sec sec-full">
+      <div class="photos" data-tilt>
+        {
+          photos.map((photo) => (
+            <figure
+              class="photo"
+              data-reveal
+              style={`--accent: ${photo.accent}; --span: ${photo.span};`}
+            >
+              <img src={photo.img} alt={photo.caption} loading="lazy" />
+              <div class="photo-scrim" />
+              <figcaption>
+                <span class="dot" />
+                {photo.caption}
+              </figcaption>
+            </figure>
+          ))
         }
-    }
-    
-    // Throttle scroll events for better performance
-    let ticking = false;
-    function requestTick() {
-        if (!ticking) {
-            requestAnimationFrame(handleScroll);
-            ticking = true;
-            setTimeout(() => { ticking = false; }, 16);
-        }
-    }
-    
-    window.addEventListener('scroll', requestTick);
-    
-    // Initialize on load
-    handleScroll();
-</script>
+      </div>
+    </section>
+
+    <!-- 4. Stack -->
+    <section class="sec">
+      <div class="sec-index">02 / skills</div>
+      <div class="sec-body">
+        <h2 class="sec-title" data-reveal>What I use</h2>
+        <h3 class="sec-note" data-reveal>Play around with the words!</h3>
+        <WordCloud />
+      </div>
+    </section>
+
+    <!-- 5. Go on -->
+    <section class="sec">
+      <div class="sec-index">03 / discover more</div>
+      <div class="sec-body">
+        <div class="rows">
+          {
+            rows.map((row) => (
+              <a class="row" href={row.href} data-reveal style={`--accent: ${row.accent};`}>
+                <span class="row-label">{row.label}</span>
+                <span class="row-note">{row.note}</span>
+                <span class="row-arrow">→</span>
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+  </main>
+</DesignLayout>
+
+<style is:global>
+  /* The home page re-themes the shell: its own near-black and ink ramp. */
+  .design-page.home {
+    background: #0D0F14;
+    color: #F5F3EF;
+  }
+
+  /* No blanket link colour: every link on this page carries a class that
+     colours it (`.cta`, `.row`, the nav, the footer), and a page-level `a`
+     rule outranks all of them — which is what turned the whole page blue. */
+  .design-page.home a {
+    text-decoration: none;
+  }
+
+  /* The marquee used to sit between the last section and the footer. */
+  .design-page.home .site-footer {
+    margin-top: 110px;
+  }
+</style>
 
 <style>
-    /* Only page-specific styles remain */
-    #description {
-        min-height: auto;
+  .home-main {
+    --ink: #F5F3EF;
+    --muted: #A9A59D;
+    --dim: #6E6B65;
+    --hair: rgba(245, 243, 239, .1);
+    --blue: #5B8CFF;
+    --green: #3DDC97;
+    --amber: #FFC145;
+    --red: #FF5470;
+    --purple: #C77DFF;
+  }
+
+  /* The opacity + transition live in `global.css`; each page supplies the
+     distance it travels. */
+  [data-reveal] {
+    transform: translateY(30px);
+  }
+
+  [data-reveal].is-revealed {
+    transform: none;
+  }
+
+  /* --- shared section grid ---------------------------------------------- */
+
+  .sec {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 110px 32px 0;
+    display: grid;
+    grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+    gap: 48px;
+  }
+
+  .sec-full {
+    display: block;
+  }
+
+  .sec-index {
+    position: sticky;
+    top: 96px;
+    align-self: start;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--dim);
+  }
+
+  .sec-body {
+    min-width: 0;
+  }
+
+  .sec-title {
+    font-family: var(--font-brico);
+    font-weight: 800;
+    font-size: clamp(34px, 4.4vw, 62px);
+    letter-spacing: -.04em;
+    line-height: 1.02;
+    margin: 0;
+  }
+
+  .sec-note {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--dim);
+    margin: 14px 0 40px;
+  }
+
+  /* --- 1. hero ------------------------------------------------------------ */
+
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: -8% 0;
+    background-size: cover;
+    background-position: center;
+    will-change: transform;
+  }
+
+  .hero-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(13, 15, 20, .5) 0%,
+      rgba(13, 15, 20, .35) 45%,
+      #0D0F14 99%
+    );
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    text-align: center;
+    will-change: transform, opacity;
+  }
+
+  .hero-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(66px, 12vw, 200px);
+    line-height: 1.02;
+    letter-spacing: -.01em;
+    white-space: nowrap;
+    margin: 0 0 22px;
+  }
+
+  .hero-sub {
+    margin: 0 auto 36px;
+    font-size: clamp(20px, 2.4vw, 30px);
+    line-height: 1.35;
+    color: #E4E1DA;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  .cta {
+    padding: 14px 26px;
+    border-radius: 999px;
+    line-height: 1;
+    transition: transform .25s var(--ease-out-soft), background .25s ease, color .25s ease;
+  }
+
+  .cta:hover {
+    transform: translateY(-2px);
+  }
+
+  .cta-primary,
+  .cta-primary:hover {
+    background: #F5F3EF;
+    color: #0D0F14;
+  }
+
+  .cta-ghost,
+  .cta-ghost:hover {
+    border: 1px solid rgba(245, 243, 239, .28);
+    backdrop-filter: blur(8px);
+    color: var(--ink);
+  }
+
+  .scroll-cue {
+    position: absolute;
+    left: 32px;
+    bottom: 34px;
+    z-index: 1;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #9A968E;
+    animation: cue-bob 2.2s ease-in-out infinite;
+  }
+
+  @keyframes cue-bob {
+    0%, 100% { transform: translateY(0); opacity: .45; }
+    50% { transform: translateY(9px); opacity: 1; }
+  }
+
+  /* --- 2. about ----------------------------------------------------------- */
+
+  .about {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    max-width: 62ch;
+  }
+
+  .about p {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.62;
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+
+  .about .about-lead {
+    font-size: clamp(22px, 2.2vw, 30px);
+    line-height: 1.35;
+    color: var(--ink);
+  }
+
+  .hl-blue,
+  .hl-green,
+  .hl-amber,
+  .hl-red {
+    font-weight: 600;
+  }
+
+  .hl-blue { color: var(--blue); }
+  .hl-green { color: var(--green); }
+  .hl-amber { color: var(--amber); }
+  .hl-red { color: var(--red); }
+
+  /* --- 3. photo strip ------------------------------------------------------ */
+
+  .photos {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .photo {
+    position: relative;
+    grid-column: span var(--span);
+    height: 400px;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 20px;
+    border: 1px solid rgba(245, 243, 239, .09);
+    transform-style: preserve-3d;
+    transition:
+      border-color .35s ease,
+      opacity .8s var(--ease-out-soft),
+      transform .8s var(--ease-out-soft);
+  }
+
+  .photo:hover {
+    border-color: var(--accent);
+  }
+
+  .photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .6s var(--ease-out-soft);
+  }
+
+  .photo:hover img {
+    transform: scale(1.05);
+  }
+
+  .photo-scrim {
+    position: absolute;
+    inset: auto 0 0;
+    height: 55%;
+    background: linear-gradient(to top, rgba(13, 15, 20, .88), transparent);
+    pointer-events: none;
+  }
+
+  .photo figcaption {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink);
+  }
+
+  .photo .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex: none;
+  }
+
+  /* Tilt is applied to an inner transform so the reveal transition can own
+     `transform` until the card is visible. */
+  .photo.is-tilting {
+    transition: border-color .35s ease, transform .2s ease-out;
+  }
+
+  /* --- 5. go on ------------------------------------------------------------ */
+
+  .rows {
+    border-top: 1px solid var(--hair);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) 54px;
+    align-items: center;
+    gap: 24px;
+    padding: 30px 0;
+    color: var(--ink);
+    transition:
+      background .35s ease,
+      padding-left .35s ease,
+      opacity .8s var(--ease-out-soft),
+      transform .8s var(--ease-out-soft);
+  }
+
+  .row + .row {
+    border-top: 1px solid var(--hair);
+  }
+
+  .row:hover {
+    background: rgba(245, 243, 239, .04);
+    padding-left: 18px;
+    color: var(--ink);
+  }
+
+  .row-label {
+    font-family: var(--font-brico);
+    font-weight: 800;
+    font-size: clamp(26px, 3.2vw, 44px);
+    letter-spacing: -.03em;
+    line-height: 1.05;
+  }
+
+  .row-note {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .row-arrow {
+    justify-self: end;
+    font-size: 22px;
+    color: var(--accent);
+  }
+
+  /* --- responsive ---------------------------------------------------------- */
+
+  @media (max-width: 900px) {
+    .sec {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+      padding-top: 88px;
     }
 
-    #description-content {
-        position: relative;
-        transform: none !important;
+    .sec-index {
+      position: static;
     }
 
-    /* Stars */
-    #stars-small,
-    #stars-medium,
-    #stars-large {
-        z-index: 0;
+    .photos {
+      grid-template-columns: minmax(0, 1fr);
     }
 
-    #description-content {
-        z-index: 1;
+    .photo {
+      grid-column: 1 / -1;
+      height: clamp(240px, 46vw, 320px);
     }
 
-    #stars-small {
-        background-image:
-            radial-gradient(1px 1px at 2% 7%,   #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 5% 12%,  #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 9% 31%,  #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 14% 38%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 17% 57%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 22% 65%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 25% 22%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 31% 8%,  #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 35% 80%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 40% 52%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 43% 41%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 48% 29%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 50% 68%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 54% 13%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 57% 74%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 60% 46%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 63% 90%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 66% 19%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 70% 62%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 75% 88%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 78% 35%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 83% 44%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 86% 76%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 91% 33%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 93% 17%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 97% 60%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 3%  82%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 7%  49%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 11% 94%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 18% 91%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 27% 47%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 36% 73%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 44% 16%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 53% 58%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 62% 94%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 71% 3%,  #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 79% 67%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 85% 22%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 90% 51%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 94% 78%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 98% 39%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 1%  55%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 16% 4%,  #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 38% 26%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 59% 85%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 73% 20%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 89% 97%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 46% 99%, #fff 0%, transparent 100%),
-            radial-gradient(1px 1px at 29% 61%, #fff 0%, transparent 100%);
-        animation: twinkle-slow 6s ease-in-out infinite alternate;
+    .row {
+      grid-template-columns: minmax(0, 1fr) 32px;
+      gap: 8px 16px;
     }
 
-    #stars-medium {
-        background-image:
-            radial-gradient(1.5px 1.5px at 4%  18%, #fff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 8%  25%, #e0eeff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 13% 62%, #fff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 19% 70%, #e0eeff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 23% 40%, #fff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 28% 86%, #e0eeff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 33% 42%, #fff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 37% 11%, #e0eeff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 42% 76%, #fff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 47% 88%, #e0eeff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 51% 30%, #fff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 58% 15%, #e0eeff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 64% 52%, #fff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 69% 55%, #e0eeff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 74% 8%,  #fff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 82% 35%, #e0eeff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 87% 70%, #fff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 92% 80%, #e0eeff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 25% 5%,  #fff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 76% 92%, #e0eeff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 55% 97%, #fff 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 95% 13%, #e0eeff 0%, transparent 100%);
-        animation: twinkle-medium 4s ease-in-out infinite alternate;
+    .row-label {
+      grid-column: 1;
     }
 
-    #stars-large {
-        background-image:
-            radial-gradient(2px 2px at 6%  30%, #fff 0%, transparent 100%),
-            radial-gradient(2px 2px at 12% 48%, #cce0ff 0%, transparent 100%),
-            radial-gradient(2px 2px at 20% 15%, #fff 0%, transparent 100%),
-            radial-gradient(2px 2px at 29% 83%, #cce0ff 0%, transparent 100%),
-            radial-gradient(2px 2px at 38% 60%, #fff 0%, transparent 100%),
-            radial-gradient(2px 2px at 46% 27%, #cce0ff 0%, transparent 100%),
-            radial-gradient(2px 2px at 55% 37%, #fff 0%, transparent 100%),
-            radial-gradient(2px 2px at 63% 78%, #cce0ff 0%, transparent 100%),
-            radial-gradient(2px 2px at 72% 72%, #fff 0%, transparent 100%),
-            radial-gradient(2px 2px at 80% 20%, #cce0ff 0%, transparent 100%),
-            radial-gradient(2px 2px at 87% 14%, #fff 0%, transparent 100%),
-            radial-gradient(2px 2px at 42% 96%, #cce0ff 0%, transparent 100%),
-            radial-gradient(2.5px 2.5px at 6%  67%, #fff 0%, transparent 100%),
-            radial-gradient(2.5px 2.5px at 33% 90%, #cce0ff 0%, transparent 100%),
-            radial-gradient(2.5px 2.5px at 65% 5%,  #fff 0%, transparent 100%),
-            radial-gradient(2.5px 2.5px at 96% 48%, #cce0ff 0%, transparent 100%),
-            radial-gradient(2.5px 2.5px at 50% 50%, #fff 0%, transparent 100%);
-        animation: twinkle-fast 3s ease-in-out infinite alternate;
+    .row-note {
+      grid-column: 1;
     }
 
-    @keyframes twinkle-slow {
-        0%   { opacity: 0.55; }
-        100% { opacity: 1; }
+    .row-arrow {
+      grid-column: 2;
+      grid-row: 1 / span 2;
     }
-    @keyframes twinkle-medium {
-        0%   { opacity: 0.65; }
-        100% { opacity: 1; }
+  }
+
+  @media (max-width: 640px) {
+    .sec {
+      padding-left: 20px;
+      padding-right: 20px;
     }
-    @keyframes twinkle-fast {
-        0%   { opacity: 0.6; }
-        100% { opacity: 1; }
+
+    .hero {
+      padding-left: 20px;
+      padding-right: 20px;
     }
+
+    .scroll-cue {
+      left: 20px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-bg,
+    .hero-inner {
+      transform: none !important;
+    }
+
+    .scroll-cue {
+      animation: none;
+      opacity: .8;
+    }
+  }
 </style>
+
+<script>
+  import { onScrollFrame, makeRevealSweep, prefersReducedMotion } from '../lib/scroll';
+
+  const reduced = prefersReducedMotion();
+  const heroBg = document.querySelector<HTMLElement>('[data-hero-bg]');
+  const heroInner = document.querySelector<HTMLElement>('[data-hero-inner]');
+  const reveal = makeRevealSweep(0.92);
+
+  // One rAF-throttled handler drives the hero parallax, the hero fade and the
+  // reveal sweep so they all land in the same frame.
+  onScrollFrame(() => {
+    const y = window.scrollY;
+
+    if (!reduced) {
+      if (heroBg) heroBg.style.transform = `translate3d(0, ${y * 0.28}px, 0)`;
+      if (heroInner) heroInner.style.transform = `translate3d(0, ${y * -0.12}px, 0)`;
+    }
+
+    if (heroInner) {
+      heroInner.style.opacity = String(Math.max(0, 1 - y / (window.innerHeight * 0.8)));
+    }
+
+    reveal();
+  });
+
+  // Pointer tilt on the photo cards — opt-in per grid, and never under
+  // reduced motion.
+  const TILT = true;
+  const grid = document.querySelector<HTMLElement>('[data-tilt]');
+
+  if (TILT && grid && !reduced && window.matchMedia('(pointer: fine)').matches) {
+    grid.querySelectorAll<HTMLElement>('.photo').forEach((card) => {
+      card.addEventListener('pointermove', (event) => {
+        const box = card.getBoundingClientRect();
+        const px = (event.clientX - box.left) / box.width - 0.5;
+        const py = (event.clientY - box.top) / box.height - 0.5;
+        card.classList.add('is-tilting');
+        card.style.transform = `perspective(900px) rotateY(${px * 8}deg) rotateX(${-py * 8}deg)`;
+      });
+
+      card.addEventListener('pointerleave', () => {
+        card.style.transform = '';
+        card.classList.remove('is-tilting');
+      });
+    });
+  }
+</script>

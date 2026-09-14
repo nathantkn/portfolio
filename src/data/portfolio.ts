@@ -79,7 +79,7 @@ export const PROJECTS: Project[] = [
     img: '/projects/haven.png',
     website: 'https://devpost.com/software/haven-kj3o4q',
     repo: 'https://github.com/Ayush7970/wildhacks_2026',
-    tags: ['TypeScript', 'Next', 'Python', 'OAuth', 'TensorFlow.js'],
+    tags: ['TypeScript', 'Next.js', 'Python', 'OAuth', 'TensorFlow.js'],
     badge: '1st place, WildHacks 2026',
     blurb:
       'Wellness and productivity for neurodivergent people: sensory-aware scheduling, focus tools, and environment sensing.',

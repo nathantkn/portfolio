@@ -289,7 +289,6 @@ const stats = [
       card.style.setProperty('--span', String(span));
 
       const badge = card.querySelector<HTMLElement>('[data-badge-text]');
-      if (badge) badge.textContent = tier === 0 ? 'current' : (card.dataset.badge ?? '');
     });
 
     if (countEl) countEl.textContent = `${visible.length} / ${cards.length}`;

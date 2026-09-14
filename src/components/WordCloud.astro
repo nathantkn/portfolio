@@ -1,0 +1,480 @@
+---
+/**
+ * The `02 / stack` centrepiece: a draggable word cloud.
+ *
+ * Word colour comes from its category; word *size* comes from how many
+ * projects in `PROJECTS` list it as a tag, so the cloud re-weights itself
+ * whenever the project data changes. Counting happens at build time; the
+ * packing happens in the browser because it needs real text metrics.
+ */
+import { PROJECTS } from '../data/portfolio';
+
+const CATEGORIES = [
+  {
+    id: 'languages',
+    color: '#C77DFF',
+    skills: [
+      'Python', 'C', 'C++', 'Java', 'JavaScript', 'TypeScript', 
+      'SQL', 'Dart', 'Swift', 'Kotlin', 'C#', 'Go'
+    ],
+  },
+  {
+    id: 'frameworks',
+    color: '#5B8CFF',
+    skills: [
+      'React', 'Node.js', 'Next.js', 'Astro', 'Vite', 'Spring', 'Flask',
+      'Express', 'Flutter', 'Tailwind', 'TensorFlow.js', 'Jest', 'Maven', 'OpenCV'
+    ],
+  },
+  {
+    id: 'technologies',
+    color: '#FF5470',
+    skills: [
+      'Linux', 'Nginx', 'RESTful APIs', 'JWT', 'OAuth', 'GoogleTest',
+      'Raspberry Pi', 'MariaDB', 'SQLite', 'Firebase', 'PostgreSQL',
+      'Postman', 'ASAN'
+    ],
+  },
+] as const;
+
+// Tag matching is case-insensitive but otherwise exact: `portfolio.ts` uses one
+// canonical spelling per skill (see the `Next.js` normalisation).
+const tagSets = PROJECTS.map((project) => new Set(project.tags.map((tag) => tag.toLowerCase())));
+const usage = (skill: string) => tagSets.filter((tags) => tags.has(skill.toLowerCase())).length;
+
+const words = CATEGORIES.flatMap((category) =>
+  category.skills.map((name) => ({
+    name,
+    cat: category.id,
+    color: category.color,
+    count: usage(name),
+  })),
+);
+
+const filters = [
+  { id: 'all', color: '#F5F3EF' },
+  ...CATEGORIES.map((category) => ({ id: category.id, color: category.color })),
+];
+---
+
+<div class="cloud-wrap" data-cloud>
+  <!-- Rendered server-side as an inline list; the script absolutely positions
+       these same spans once it can measure them, so no-JS still reads fine. -->
+  <div class="cloud is-static" id="cloud">
+    {
+      words.map((word) => (
+        <span
+          class="word"
+          data-word={word.name}
+          data-cat={word.cat}
+          style={`color: ${word.color}`}
+        >
+          {word.name}
+        </span>
+      ))
+    }
+  </div>
+
+  <div class="filters" role="group" aria-label="Filter skills by category">
+    {
+      filters.map((filter) => (
+        <button
+          type="button"
+          class:list={['pill', { 'is-active': filter.id === 'all' }]}
+          data-filter={filter.id}
+          data-color={filter.color}
+          aria-pressed={filter.id === 'all' ? 'true' : 'false'}
+        >
+          {filter.id}
+        </button>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .cloud {
+    position: relative;
+    width: 100%;
+    touch-action: none;
+  }
+
+  /* Pre-hydration / no-JS flow layout. */
+  .cloud.is-static {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 10px 18px;
+  }
+
+  .word {
+    font-family: var(--font-brico);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -.03em;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: grab;
+    transition: color .2s ease;
+  }
+
+  .cloud.is-static .word {
+    font-size: 22px;
+  }
+
+  .cloud:not(.is-static) .word {
+    position: absolute;
+    top: 0;
+    left: 0;
+    will-change: transform;
+  }
+
+  .word:hover {
+    color: #F5F3EF !important;
+  }
+
+  .word.is-dragging {
+    z-index: 5;
+    cursor: grabbing;
+    color: #F5F3EF !important;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 34px;
+  }
+
+  .pill {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(245, 243, 239, .18);
+    background: transparent;
+    color: #9A968E;
+    cursor: pointer;
+    transition: color .2s ease, background .2s ease, border-color .2s ease;
+  }
+
+  .pill:hover {
+    border-color: var(--pill-color, #F5F3EF);
+    color: #F5F3EF;
+  }
+
+  .pill.is-active {
+    background: var(--pill-color, #F5F3EF);
+    border-color: var(--pill-color, #F5F3EF);
+    color: #0D0F14;
+  }
+</style>
+
+<script define:vars={{ words }}>
+  const wrap = document.querySelector('[data-cloud]');
+  const canvas = wrap.querySelector('.cloud');
+  const pills = [...wrap.querySelectorAll('.pill')];
+  const measure = document.createElement('canvas').getContext('2d');
+
+  // Gap enforced between two word boxes by both the packer and the runtime
+  // separation pass, so dropped words settle at the same density they packed.
+  const PAD_X = 16;
+  const PAD_Y = 12;
+  // Widest first: the cloud grows taller rather than denser as the column
+  // narrows, which keeps the big words legible on phones.
+  const STRETCHES = [1.9, 1.5, 1.2, 0.95, 0.72, 0.55, 0.4];
+
+  pills.forEach((pill) => pill.style.setProperty('--pill-color', pill.dataset.color));
+
+  const nodes = words.map((word) => ({
+    ...word,
+    el: canvas.querySelector(`[data-word="${CSS.escape(word.name)}"]`),
+    x: 0, y: 0, w: 0, h: 0, fs: 13,
+    dx: 0, dy: 0,
+    drag: false,
+    visible: true,
+  }));
+
+  let active = 'all';
+  let cloudWidth = 0;
+  let cloudHeight = 0;
+  // Cached unfiltered height for the current width: every filter reuses it so
+  // the pill row never moves when you switch categories.
+  let fullHeight = 0;
+  let fullHeightWidth = -1;
+
+  /* ---- packing ---------------------------------------------------------- */
+
+  function sizeWords(list, cw) {
+    const counts = list.map((word) => word.count);
+    const min = Math.min(...counts);
+    const max = Math.max(...counts);
+    const span = Math.max(1, max - min);
+    const fscale = Math.min(1, cw / 860) * (list.length > 20 ? 0.86 : 1);
+
+    return list
+      .map((word) => {
+        const t = (word.count - min) / span;
+        const fs = Math.max(13, Math.round((17 + t * 47) * fscale));
+        measure.font = `800 ${fs}px "Bricolage Grotesque", sans-serif`;
+        return {
+          word,
+          fs,
+          w: measure.measureText(word.name).width * 0.97,
+          h: fs * 0.82,
+        };
+      })
+      .sort((a, b) => b.fs - a.fs || b.w - a.w);
+  }
+
+  const overlaps = (a, b) =>
+    Math.abs(a.x - b.x) < (a.w + b.w) / 2 + PAD_X &&
+    Math.abs(a.y - b.y) < (a.h + b.h) / 2 + PAD_Y;
+
+  /** Biggest-first placement along an Archimedean spiral. */
+  function spiralPack(sized, stretch) {
+    const placed = [];
+
+    for (const item of sized) {
+      const box = { x: 0, y: 0, w: item.w, h: item.h };
+      for (let s = 0; s < 8000; s++) {
+        const a = s * 0.32;
+        const rad = 1.1 * a;
+        box.x = Math.cos(a) * rad * stretch;
+        box.y = Math.sin(a) * rad * 0.62;
+        if (!placed.some((other) => overlaps(other, box))) break;
+      }
+      placed.push({ ...item, x: box.x, y: box.y });
+    }
+
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const p of placed) {
+      minX = Math.min(minX, p.x - p.w / 2);
+      maxX = Math.max(maxX, p.x + p.w / 2);
+      minY = Math.min(minY, p.y - p.h / 2);
+      maxY = Math.max(maxY, p.y + p.h / 2);
+    }
+
+    return { placed, minX, minY, width: maxX - minX, height: maxY - minY };
+  }
+
+  /** Packs `list` into a `cw`-wide column and returns the scaled result. */
+  function pack(list, cw) {
+    const sized = sizeWords(list, cw);
+
+    let packed = spiralPack(sized, STRETCHES[0]);
+    for (const stretch of STRETCHES) {
+      packed = spiralPack(sized, stretch);
+      if (packed.width <= cw) break;
+    }
+
+    // Grow (or shrink) the whole cluster so it fills the column.
+    const fit = Math.min(1.3, (cw - 8) / Math.max(1, packed.width));
+    const placed = packed.placed.map((p) => ({
+      word: p.word,
+      fs: Math.max(11, p.fs * fit),
+      w: p.w * fit,
+      h: p.h * fit,
+      x: (p.x - packed.minX) * fit,
+      y: (p.y - packed.minY) * fit,
+    }));
+
+    return { placed, width: packed.width * fit, height: packed.height * fit };
+  }
+
+  /* ---- render ----------------------------------------------------------- */
+
+  function apply(list) {
+    const cw = Math.max(260, canvas.clientWidth);
+    cloudWidth = cw;
+
+    const result = pack(list, cw);
+
+    // Only an unfiltered pass defines the canvas height; filtered passes reuse
+    // the cached one so selecting a category can't shift the page.
+    if (active === 'all') {
+      fullHeight = result.height + 40;
+      fullHeightWidth = cw;
+    }
+
+    cloudHeight = fullHeightWidth === cw
+      ? Math.max(fullHeight, result.height + 40)
+      : result.height + 40;
+    canvas.style.height = `${Math.round(cloudHeight)}px`;
+
+    const offsetX = (cw - result.width) / 2;
+    const offsetY = (cloudHeight - result.height) / 2;
+    const shown = new Set(list.map((word) => word.name));
+
+    for (const node of nodes) {
+      node.visible = shown.has(node.name);
+      node.el.style.display = node.visible ? '' : 'none';
+      node.drag = false;
+      node.dx = 0;
+      node.dy = 0;
+      node.el.classList.remove('is-dragging');
+    }
+
+    for (const item of result.placed) {
+      const node = nodes.find((n) => n.name === item.word.name);
+      node.fs = item.fs;
+      node.w = item.w;
+      node.h = item.h;
+      node.x = offsetX + item.x;
+      node.y = offsetY + item.y;
+      node.el.style.fontSize = `${item.fs}px`;
+      node.el.style.left = `${Math.round(node.x - item.w / 2)}px`;
+      node.el.style.top = `${Math.round(node.y - item.fs / 2)}px`;
+      node.el.style.transform = 'translate(0px, 0px)';
+    }
+
+    canvas.classList.remove('is-static');
+    kick(90);
+  }
+
+  /* ---- drag + settle loop ------------------------------------------------ */
+
+  let frames = 0;
+  let running = false;
+  let dragging = null;
+
+  function kick(n) {
+    frames = Math.max(frames, n);
+    if (running) return;
+    running = true;
+    requestAnimationFrame(tick);
+  }
+
+  function tick() {
+    const live = nodes.filter((node) => node.visible);
+
+    // Separate overlapping words along their shallower axis. A held word is
+    // never pushed — it goes exactly where the cursor is.
+    for (let i = 0; i < live.length; i++) {
+      for (let j = i + 1; j < live.length; j++) {
+        const a = live[i];
+        const b = live[j];
+        if (a.drag && b.drag) continue;
+
+        const ax = a.x + a.dx, ay = a.y + a.dy;
+        const bx = b.x + b.dx, by = b.y + b.dy;
+        const gapX = (a.w + b.w) / 2 + PAD_X - Math.abs(ax - bx);
+        const gapY = (a.h + b.h) / 2 + PAD_Y - Math.abs(ay - by);
+        if (gapX <= 0 || gapY <= 0) continue;
+
+        const movable = [a, b].filter((node) => !node.drag);
+        const push = (gapX < gapY ? gapX : gapY) * 0.14 / movable.length;
+
+        for (const node of movable) {
+          if (gapX < gapY) {
+            node.dx += (node === a ? Math.sign(ax - bx) || 1 : Math.sign(bx - ax) || -1) * push;
+          } else {
+            node.dy += (node === a ? Math.sign(ay - by) || 1 : Math.sign(by - ay) || -1) * push;
+          }
+        }
+      }
+    }
+
+    // Ease stragglers back inside — only once they've been let go, so a held
+    // word can be dragged clean off the canvas.
+    for (const node of live) {
+      if (node.drag) continue;
+      const left = node.x + node.dx - node.w / 2;
+      const right = node.x + node.dx + node.w / 2;
+      const top = node.y + node.dy - node.h / 2;
+      const bottom = node.y + node.dy + node.h / 2;
+
+      if (left < 0) node.dx += -left * 0.14;
+      else if (right > cloudWidth) node.dx -= (right - cloudWidth) * 0.14;
+
+      if (top < 0) node.dy += -top * 0.14;
+      else if (bottom > cloudHeight) node.dy -= (bottom - cloudHeight) * 0.14;
+    }
+
+    for (const node of live) {
+      node.el.style.transform = `translate(${node.dx.toFixed(2)}px, ${node.dy.toFixed(2)}px)`;
+    }
+
+    frames--;
+    if (frames > 0 || dragging) {
+      requestAnimationFrame(tick);
+    } else {
+      running = false;
+    }
+  }
+
+  for (const node of nodes) {
+    node.el.addEventListener('pointerdown', (event) => {
+      event.preventDefault();
+      node.el.setPointerCapture(event.pointerId);
+      node.drag = true;
+      dragging = node;
+      node.el.classList.add('is-dragging');
+      node.grabX = event.clientX - node.dx;
+      node.grabY = event.clientY - node.dy;
+      kick(1);
+    });
+
+    node.el.addEventListener('pointermove', (event) => {
+      if (!node.drag) return;
+      node.dx = event.clientX - node.grabX;
+      node.dy = event.clientY - node.grabY;
+      kick(1);
+    });
+
+    const release = () => {
+      if (!node.drag) return;
+      node.drag = false;
+      dragging = null;
+      node.el.classList.remove('is-dragging');
+      // Dropped words stay put; only out-of-bounds ones glide back.
+      kick(120);
+    };
+
+    node.el.addEventListener('pointerup', release);
+    node.el.addEventListener('pointercancel', release);
+  }
+
+  /* ---- filters ----------------------------------------------------------- */
+
+  for (const pill of pills) {
+    pill.addEventListener('click', () => {
+      active = pill.dataset.filter;
+      for (const other of pills) {
+        const on = other === pill;
+        other.classList.toggle('is-active', on);
+        other.setAttribute('aria-pressed', String(on));
+      }
+      apply(active === 'all' ? words : words.filter((word) => word.cat === active));
+    });
+  }
+
+  /* ---- boot + resize ------------------------------------------------------ */
+
+  const relayout = () => apply(active === 'all' ? words : words.filter((word) => word.cat === active));
+
+  const start = () => {
+    apply(words);
+    let lastWidth = canvas.clientWidth;
+    new ResizeObserver(() => {
+      const next = canvas.clientWidth;
+      if (Math.abs(next - lastWidth) < 2) return;
+      lastWidth = next;
+      fullHeightWidth = -1;
+      const previous = active;
+      active = 'all';
+      apply(words);
+      if (previous !== 'all') {
+        active = previous;
+        relayout();
+      }
+    }).observe(canvas.parentElement);
+  };
+
+  // Metrics are wrong until the display face is loaded.
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(start);
+  else start();
+</script>

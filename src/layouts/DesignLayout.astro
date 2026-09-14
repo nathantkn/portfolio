@@ -1,7 +1,6 @@
 ---
 /**
- * Shell for the redesigned pages: one nav, one footer, one token set.
- * The About page keeps using `Layout.astro`.
+ * Shell for every page: one nav, one footer, one token set.
  */
 import '../styles/global.css';
 import SiteNav from '../components/SiteNav.astro';
@@ -11,9 +10,15 @@ interface Props {
   title: string;
   description: string;
   active: 'about' | 'projects' | 'experience' | 'leadership';
+  /** Drop the nav offset so the first section can run full-bleed under it. */
+  flush?: boolean;
+  /** Pages with their own footer markup opt out of the shared one. */
+  footer?: boolean;
+  /** Extra class on `<body>`, for pages that re-theme the shell. */
+  bodyClass?: string;
 }
 
-const { title, description, active } = Astro.props;
+const { title, description, active, flush = false, footer = true, bodyClass } = Astro.props;
 ---
 
 <!doctype html>
@@ -28,10 +33,10 @@ const { title, description, active } = Astro.props;
     <meta name="description" content={description} />
     <title>{title}</title>
   </head>
-  <body class="design-page">
+  <body class:list={['design-page', { 'is-flush': flush }, bodyClass]}>
     <SiteNav active={active} />
     <slot />
-    <SiteFooter />
+    {footer && <SiteFooter />}
   </body>
 </html>
 
@@ -42,13 +47,18 @@ const { title, description, active } = Astro.props;
     padding-top: var(--nav-h);
   }
 
-  /* Link colour for the redesigned pages only. */
-  .design-page a {
+  .design-page.is-flush {
+    padding-top: 0;
+  }
+
+  /* Link colour for the redesigned pages only. `:where()` on the page class
+     keeps this at element specificity so component classes still win. */
+  :where(.design-page) a {
     color: var(--accent);
     text-decoration: none;
   }
 
-  .design-page a:hover {
+  :where(.design-page) a:hover {
     color: var(--accent-hover);
   }
 
