@@ -1,223 +1,354 @@
 ---
-import "../styles/global.css";
-import Layout from '../layouts/Layout.astro';
-import SkillBadge from '../components/SkillBadge.astro';
-import { Icon } from 'astro-icon/components'
+import DesignLayout from '../layouts/DesignLayout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import ProjectDetail from '../components/ProjectDetail.astro';
+import { PROJECTS, PROJECT_KINDS } from '../data/portfolio';
+import { waterfall, uniqueTags } from '../lib/waterfall';
 
-const projects = [
-  {
-    title: "Haven",
-    endDate: "April 2025",
-    website: "https://devpost.com/software/haven-kj3o4q",
-    repo: "https://github.com/Ayush7970/wildhacks_2026",
-    tags: ["TypeScript", "Next", "Python", "OAuth", "TensorFlow.js"],
-    img: "/projects/haven.png",
-    desc: "A neurodivergent-focused wellness and productivity app. Haven helps people with sensory processing differences navigate daily life through smarter scheduling, focus tools, sensory-aware place ratings, and environment sensing. First place for WildHacks 2026.",
-  },
-  {
-      title: "SparkHacks 2026 Website",
-      startDate: "August 2025",
-      endDate: "February 2026",
-      website: "https://www.sparkhacks.org/",
-      repo: "https://github.com/SparkHacks/spark-web-2026",
-      tags: ["Astro", "TypeScript", "Tailwind"],
-      img: "/projects/sparkhacks.png",
-      desc: "The flagship website for SparkHacks 2026. Built by UIC students, for UIC students. Lights, cameras, hacktion!",
-  },
-  {
-      title: "SparkHacks 2026 Dashboard",
-      startDate: "August 2025",
-      endDate: "February 2026",
-      website: "https://dashboard.sparkhacks.org/",
-      repo: "https://github.com/SparkHacks/spark-dashboard",
-      tags: ["Astro", "TypeScript", "Firebase", "Tailwind"],
-      img: "/projects/dashboard.png",
-      desc: "The user/admin dashboard for SparkHacks 2026. Used for managing applications, scanning QR codes, and changing permissions.",
-  },
-  {
-    title: "Mystery AI",
-    startDate: "October 2025",
-    endDate: "April 2026",
-    website: "https://ai-privacy-literacy.vercel.app/",
-    repo: "https://github.com/nsoniuic/AI-Privacy-Literacy-Fall-2025",
-    tags: ["React", "Node.js", "JavaScript"],
-    img: "/projects/mystery_ai.png",
-    desc: "An interactive educational web application designed to teach children about AI reasoning, pattern recognition, and digital privacy through engaging puzzles and scenarios.",
-  },
-  {
-    title: "Outloop AI",
-    endDate: "March 2026",
-    website: "https://devpost.com/software/chicago-team",
-    repo: "https://github.com/YamaanNandolia/Outloop-AI",
-    tags: ["Jac", "TypeScript", "Python"],
-    img: "/projects/outloop.png",
-    desc: "An autonomous startup builder that analyzes trends from around the world, extrapolates problem statements, and autonomously builds software products to address those problems. It also simultaneously handles the business development and customer outreach.",
-  },
-  {
-    title: "Schedly",
-    startDate: "October 2025",
-    endDate: "December 2025",
-    website: "https://schedly-gtxg.onrender.com/",
-    repo: "https://github.com/mqbal/CS484_Final",
-    tags: ["Next.js", "React", "TypeScript", "OAuth"],
-    img: "/projects/schedly.png",
-    desc: "Upload your course syllabi and let AI extract assignments and exam dates. Sync everything to Google Calendar, and never miss a deadline again.",
-  },
-  {
-    title: "Restockd",
-    startDate: "September 2025",
-    endDate: "December 2025",
-    website: "https://restockd-ten.vercel.app/",
-    repo: "https://github.com/TheRoadSurgeon/CS351-GroupProject",
-    tags: ["React", "Flask", "PostgreSQL"],
-    img: "/projects/restockd.png",
-    desc: "Streamlines coordination between food donors and food banks in real-time. Enables food banks to post donation needs, donors to discover nearby opportunities, and both parties to schedule seamless pickups and drop-offs.",
-  },
-  {
-    title: "Dynamic Bill Splitter",
-    endDate: "October 2025",
-    website: "https://dynamic-bill-splitter.vercel.app/",
-    repo: "https://github.com/nathantkn/astro-bill-splitter",
-    tags: ["Astro", "TypeScript", "Vite", "Spline"],
-    img: "/projects/bill_splitter.png",
-    desc: "Allows parties to split dining and grocery bills, based on the number of people and the items they bought or shared. Created for my own personal use for nights out with friends.",
-  },
-  {
-    title: "Music Ranker",
-    startDate: "May 2025",
-    endDate: "February 2026",
-    website: "https://music-rank-5wfy.onrender.com",
-    repo: "https://github.com/nathantkn/music-rank",
-    tags: ["React", "Node.js", "Express", "PostgreSQL"],
-    img: "/projects/music_ranker.png",
-    desc: "Allows users to rank their favorite music tracks and discover new ones based on their preferences.",
-  },
-  {
-    title: "TARIFFARM",
-    endDate: "March 2025",
-    website: "https://devpost.com/software/idk-yet-o67hj8",
-    repo: "https://github.com/nathantkn/tariffarm",
-    tags: ["Python", "React", "Next.js"],
-    img: "/projects/tariffarm.jpg",
-    desc: "Allows users to calculate and visualize the full cost of importing commodities into the US. Third place winner for WildHacks 2025.",
-  },
-  {
-    title: "Baldur: Debris Detection and Removal",
-    endDate: "February 2025",
-    website: "https://devpost.com/software/baldur-8h2tmn",
-    repo: "https://github.com/nathantkn/Baldur-HackIllinois",
-    tags: ["Python", "OpenCV", "Flutter", "Dart", "Raspberry Pi"],
-    img: "/projects/baldur.jpg",
-    desc: "An autonomous, AI-powered solution to detect and remove debris from fields using a Raspberry Pi-controlled vehicle equipped with a robotic claw. Submission for HackIllinois 2025.",
-  },
+// The unfiltered cascade is resolved at build time so the first paint already
+// has its final geometry — the client only re-flows when a filter changes.
+const slots = waterfall(PROJECTS.length);
+
+// One pill per project kind, in PROJECT_KINDS order; kinds nothing is tagged
+// with are dropped so the row never offers a filter that empties the grid.
+const filters = [
+  { name: 'all', count: PROJECTS.length },
+  ...PROJECT_KINDS.map((kind) => ({
+    name: kind,
+    count: PROJECTS.filter((project) => project.kind === kind).length,
+  })).filter((filter) => filter.count > 0),
+];
+
+// Duplicated so the translateX(-50%) loop is seamless.
+const marqueeRun = uniqueTags(PROJECTS);
+const marquee = [...marqueeRun, ...marqueeRun];
+
+const stats = [
+  { figure: '11', label: 'shipped', accent: false },
+  { figure: '3', label: 'hackathon wins', accent: false },
+  { figure: '700+', label: 'real users', accent: true },
 ];
 ---
 
-<Layout title="Projects">
-  <div class="min-h-screen bg-gradient-to-br from-slate-900 via-gray-800 to-slate-800 text-white">
-    <div class="container mx-auto px-4 py-16 max-w-8xl">
-      <!-- Header -->
-      <div class="text-center mb-16">
-        <h1 class="text-sky-400 font-bold font-dancing text-6xl md:text-8xl lg:text-9xl mb-4 bg-gradient-to-r from-sky-400 to-blue-500 bg-clip-text text-transparent">
-          Projects
-        </h1>
-        <div class="w-60 h-1 bg-gradient-to-r from-sky-500 to-blue-600 mx-auto rounded-full"></div>
-      </div>
-
-      <!-- Projects Grid -->
-      <div class="grid lg:grid-cols-3 gap-12">
-        {projects.map((project, index) => (
-          <div class="featured-project rounded-2xl p-8 animate-fade-in h-full flex flex-col" style={`animation-delay: ${index * 0.2}s`}>
-            <div class="flex flex-col gap-6 h-full">
-              <!-- Project Header -->
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <h2 class="text-2xl lg:text-3xl font-bold text-white hover:text-sky-400 transition-colors duration-300">
-                    {project.title}
-                  </h2>
-                  <p class="text-gray-400 text-sm mt-2">
-                    {project.startDate ? `${project.startDate} - ${project.endDate}` : project.endDate}
-                  </p>
-                </div>
-                <span class="flex gap-2">
-                  <a href={project.website} class="project-link text-sky-400 hover:text-sky-300 text-3xl" target="_blank" rel="noopener noreferrer">
-                    <Icon name="tab" />
-                  </a>
-                  <a href={project.repo} class="project-link text-sky-400 hover:text-sky-300 text-3xl" target="_blank" rel="noopener noreferrer">
-                    <Icon name="github" />
-                  </a>
-                </span>
-              </div>
-              
-              <!-- Project Image -->
-              {project.img && (
-                  <img src={project.img} alt={project.title} class="w-full aspect-[16/10] object-cover rounded-xl shadow-2xl" />
-              )}
-              
-              <!-- Project Description -->
-              <p class="text-gray-300 text-lg leading-relaxed flex-grow">
-                {project.desc}
-              </p>
-              
-              <!-- Project Tags using SkillBadge component -->
-              <div class="flex gap-3 flex-wrap mt-auto">
-                {project.tags.map((tag) => (
-                  <SkillBadge skill={tag} />
-                ))}
-              </div>
+<DesignLayout
+  title="Nathan Trinh"
+  description="Projects Nathan Trinh has designed, built and shipped."
+  active="projects"
+>
+  <header class="shell hero">
+    <div class="hero-row">
+      <h1 class="d-h1 hero-title" data-hero>My<br /><span class="dot">shipped projects</span></h1>
+      <div class="stats">
+        {
+          stats.map((stat) => (
+            <div class="stat">
+              <div class:list={['num', 'figure', { 'is-accent': stat.accent }]}>{stat.figure}</div>
+              <div class="stat-label">{stat.label}</div>
             </div>
-          </div>
-        ))}
+          ))
+        }
       </div>
     </div>
+  </header>
+
+  <div class="shell filters">
+    <span class="filters-label">filter</span>
+    <div class="filter-pills" role="group" aria-label="Filter projects by type">
+      {
+        filters.map(({ name, count }) => (
+          <button
+            class:list={['pill', { 'is-active': name === 'all' }]}
+            type="button"
+            data-filter={name}
+            aria-pressed={name === 'all'}
+          >
+            {name}
+            <span class="pill-count">{count}</span>
+          </button>
+        ))
+      }
+    </div>
+    <span class="count" data-count aria-live="polite">{PROJECTS.length} / {PROJECTS.length}</span>
   </div>
 
-  <style>
-    .font-dancing {
-      background-size: 200% 200%;
-      animation: gradient-shift 3s ease-in-out infinite;
+  <main class="shell grid" data-grid>
+    {
+      PROJECTS.map((project, i) => (
+        <ProjectCard project={project} index={i} tier={slots[i].tier} span={slots[i].span} />
+      ))
     }
-    
-    @keyframes gradient-shift {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
+  </main>
+
+  <ProjectDetail projects={PROJECTS} />
+</DesignLayout>
+
+<style>
+  /* --- Header ------------------------------------------------------------- */
+
+  .hero {
+    padding: 84px 40px 40px;
+    max-width: var(--maxw);
+    margin: 0 auto;
+  }
+
+  .hero-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 48px;
+    flex-wrap: wrap;
+  }
+
+  .hero-title {
+    font-size: clamp(56px, 10vw, 170px);
+  }
+
+  .dot {
+    color: var(--accent);
+  }
+
+  .stats {
+    display: flex;
+    gap: 44px;
+    padding-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .figure {
+    font-size: 56px;
+    color: var(--ink);
+  }
+
+  .figure.is-accent {
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-family: var(--font-body);
+    font-size: 11px;
+    color: var(--ink-4);
+    margin-top: 6px;
+  }
+
+  /* --- Marquee ------------------------------------------------------------ */
+
+  .marquee {
+    overflow: hidden;
+    border-top: 1px solid var(--rule-faint);
+    border-bottom: 1px solid var(--rule-faint);
+    padding: 13px 0;
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: d-marquee 38s linear infinite;
+  }
+
+  .marquee-item {
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--ink-5);
+    padding: 0 22px;
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+      animation: none;
+    }
+  }
+
+  /* --- Filter row --------------------------------------------------------- */
+
+  .filters {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 26px 40px 0;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .filters-label,
+  .count {
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--ink-5);
+  }
+
+  .filters-label {
+    font-size: 11px;
+  }
+
+  .count {
+    margin-left: auto;
+  }
+
+  .filter-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    font-family: var(--font-body);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 7px 13px;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(239, 235, 228, .16);
+    background: transparent;
+    color: var(--ink-4);
+    transition: color .2s ease, background .2s ease, border-color .2s ease;
+  }
+
+  .pill-count {
+    margin-left: 7px;
+    font-size: 10px;
+    opacity: .55;
+  }
+
+  .pill:hover {
+    color: var(--ink);
+  }
+
+  .pill.is-active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--bg);
+  }
+
+  /* --- Grid --------------------------------------------------------------- */
+
+  .grid {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 26px 40px 120px;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  @media (max-width: 900px) {
+    .hero {
+      padding: 56px 20px 32px;
     }
 
-    .featured-project {
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.7) 100%);
-      backdrop-filter: blur(15px);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      transition: all 0.3s ease;
+    .filters {
+      padding: 22px 20px 0;
     }
 
-    .featured-project:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 40px rgba(56, 189, 248, 0.15);
-      border-color: rgba(56, 189, 248, 0.4);
+    .grid {
+      padding: 22px 20px 80px;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .stats {
+      gap: 28px;
     }
 
-    .project-link {
-      transition: all 0.2s ease;
+    .figure {
+      font-size: 42px;
+    }
+  }
+</style>
+
+<script>
+  import { onScrollFrame, makeRevealSweep, parallaxHero } from '../lib/scroll';
+  import { waterfall } from '../lib/waterfall';
+
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-card]')];
+  const pills = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+  const countEl = document.querySelector<HTMLElement>('[data-count]');
+
+  /* --- Scroll: hero parallax + reveal sweep ------------------------------ */
+
+  const heroFrame = parallaxHero(document.querySelector<HTMLElement>('[data-hero]'), -0.13);
+  const sweep = makeRevealSweep(0.94);
+
+  onScrollFrame(() => {
+    heroFrame();
+    sweep();
+  });
+
+  /* --- Filtering: re-apply the cascade to the filtered set --------------- */
+
+  function applyFilter(active: string) {
+    const visible = cards.filter((card) => active === 'all' || card.dataset.kind === active);
+    const shown = new Set(visible);
+
+    for (const card of cards) card.hidden = !shown.has(card);
+
+    const slots = waterfall(visible.length);
+    visible.forEach((card, i) => {
+      const { tier, span } = slots[i];
+      card.dataset.tier = String(tier);
+      card.style.setProperty('--span', String(span));
+
+      const badge = card.querySelector<HTMLElement>('[data-badge-text]');
+      if (badge) badge.textContent = tier === 0 ? 'current' : (card.dataset.badge ?? '');
+    });
+
+    if (countEl) countEl.textContent = `${visible.length} / ${cards.length}`;
+
+    for (const pill of pills) {
+      const isActive = pill.dataset.filter === active;
+      pill.classList.toggle('is-active', isActive);
+      pill.setAttribute('aria-pressed', String(isActive));
     }
 
-    .project-link:hover {
-      transform: scale(1.1);
-      filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.5));
-    }
+    // Newly-shown cards further down the page still need revealing.
+    sweep();
+  }
 
-    @keyframes fade-in-up {
-      from {
-        opacity: 0;
-        transform: translateY(40px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+  for (const pill of pills) {
+    pill.addEventListener('click', () => applyFilter(pill.dataset.filter ?? 'all'));
+  }
 
-    .animate-fade-in {
-      animation: fade-in-up 0.8s ease-out both;
-    }
-  </style>
-</Layout>
+  /* --- Detail overlay ---------------------------------------------------- */
+
+  const backdrop = document.querySelector<HTMLElement>('[data-detail-backdrop]');
+  const panels = [...document.querySelectorAll<HTMLElement>('[data-detail-panel]')];
+  let lastFocused: HTMLElement | null = null;
+
+  function openDetail(index: number) {
+    if (!backdrop) return;
+    lastFocused = document.activeElement as HTMLElement | null;
+
+    for (const panel of panels) panel.hidden = panel.dataset.detailPanel !== String(index);
+    backdrop.hidden = false;
+    document.documentElement.classList.add('scroll-locked');
+
+    const active = panels.find((panel) => !panel.hidden);
+    active?.querySelector<HTMLElement>('[data-detail-close]')?.focus();
+  }
+
+  function closeDetail() {
+    if (!backdrop || backdrop.hidden) return;
+    backdrop.hidden = true;
+    for (const panel of panels) panel.hidden = true;
+    document.documentElement.classList.remove('scroll-locked');
+    lastFocused?.focus();
+  }
+
+  for (const card of cards) {
+    card.querySelector('[data-open]')?.addEventListener('click', () => {
+      openDetail(Number(card.dataset.index));
+    });
+  }
+
+  backdrop?.addEventListener('click', (event) => {
+    if (event.target === backdrop) closeDetail();
+  });
+
+  for (const button of document.querySelectorAll('[data-detail-close]')) {
+    button.addEventListener('click', closeDetail);
+  }
+
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeDetail();
+  });
+</script>

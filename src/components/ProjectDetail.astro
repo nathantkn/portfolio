@@ -1,0 +1,239 @@
+---
+/**
+ * The project detail modal. Every panel is server-rendered inside one backdrop
+ * and toggled by index, so all copy stays escaped and no client-side
+ * templating is needed.
+ */
+import type { Project } from '../data/portfolio';
+
+interface Props {
+  projects: Project[];
+}
+
+const { projects } = Astro.props;
+---
+
+<div class="backdrop" data-detail-backdrop hidden>
+  {
+    projects.map((project, i) => (
+      <div
+        class="panel"
+        data-detail-panel={i}
+        role="dialog"
+        aria-modal="true"
+        aria-label={project.title}
+        hidden
+      >
+        <div class="cover">
+          <img src={project.img} alt={project.title} loading="lazy" decoding="async" />
+          <span class="cover-scrim" aria-hidden="true" />
+          <button class="close" type="button" data-detail-close aria-label="Close details">×</button>
+        </div>
+
+        <div class="content">
+          <div class="head">
+            <h3 class="d-title title">{project.title}</h3>
+            <span class="dates">{project.dates}</span>
+          </div>
+
+          <p class="desc">{project.desc}</p>
+
+          <div class="tags">
+            {project.tags.map((tag) => <span class="tag">{tag}</span>)}
+          </div>
+
+          <div class="ctas">
+            <a class="cta cta-solid" href={project.website} target="_blank" rel="noopener noreferrer">
+              visit site →
+            </a>
+            <a class="cta cta-ghost" href={project.repo} target="_blank" rel="noopener noreferrer">
+              source
+            </a>
+          </div>
+        </div>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(6, 7, 10, .82);
+    backdrop-filter: blur(10px);
+    animation: d-fade-in .3s ease both;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px;
+    overflow-y: auto;
+  }
+
+  .backdrop[hidden] {
+    display: none;
+  }
+
+  .panel {
+    width: min(1040px, 100%);
+    margin: auto;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    overflow: hidden;
+    animation: d-sheet-in .45s var(--ease-out-soft) both;
+  }
+
+  .panel[hidden] {
+    display: none;
+  }
+
+  /* --- Cover ------------------------------------------------------------- */
+
+  .cover {
+    position: relative;
+    background: var(--surface-2);
+  }
+
+  .cover img {
+    width: 100%;
+    aspect-ratio: 16 / 8;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+  }
+
+  .cover-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, var(--surface) 3%, transparent 55%);
+  }
+
+  .close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: rgba(11, 11, 12, .75);
+    color: var(--ink);
+    border: 1px solid rgba(239, 235, 228, .18);
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    font-size: 17px;
+    line-height: 1;
+    font-family: var(--font-body);
+    transition: border-color .2s ease;
+  }
+
+  .close:hover {
+    border-color: var(--ink);
+  }
+
+  /* --- Content ----------------------------------------------------------- */
+
+  .content {
+    padding: 8px 40px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .title {
+    font-size: 52px;
+    line-height: 1.14;
+  }
+
+  .dates {
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--ink-4);
+  }
+
+  .desc {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.62;
+    color: var(--ink-2);
+    max-width: 68ch;
+    text-wrap: pretty;
+  }
+
+  .tags {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-family: var(--font-body);
+    font-size: 11px;
+    color: var(--ink-2);
+    background: rgba(239, 235, 228, .08);
+    padding: 7px 12px;
+    border-radius: var(--radius-chip);
+  }
+
+  .ctas {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+
+  .cta {
+    font-family: var(--font-body);
+    font-size: 13px;
+    border-radius: var(--radius-pill);
+    transition: background .2s ease, border-color .2s ease, color .2s ease;
+  }
+
+  .cta-solid {
+    color: var(--bg);
+    background: var(--ink);
+    padding: 13px 24px;
+  }
+
+  .cta-solid:hover {
+    color: var(--bg);
+    background: #fff;
+  }
+
+  .cta-ghost {
+    color: var(--ink);
+    border: 1px solid rgba(239, 235, 228, .22);
+    padding: 12px 24px;
+  }
+
+  .cta-ghost:hover {
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+
+  @media (max-width: 700px) {
+    .backdrop {
+      padding: 16px;
+    }
+
+    .content {
+      padding: 8px 22px 28px;
+    }
+
+    .title {
+      font-size: 34px;
+    }
+
+    .desc {
+      font-size: 16px;
+    }
+  }
+</style>

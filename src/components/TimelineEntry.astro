@@ -1,0 +1,380 @@
+---
+/**
+ * One role on the centre-spine timeline: card on one side, date block on the
+ * other, marker dot on the spine. Entries alternate sides.
+ */
+import RichText from './RichText.astro';
+
+interface Props {
+  anchor: string;
+  index: string;
+  role: string;
+  company: string;
+  /** Company mark beside the name; empty string renders nothing. */
+  logo: string;
+  /** Polaroid photo under the date block; empty string renders nothing. */
+  photo: string;
+  date: string;
+  bigYear: string;
+  duration: string;
+  current: boolean;
+  bullets: string[];
+  /** Which side of the spine the card sits on. */
+  side: 'left' | 'right';
+}
+
+const {
+  anchor,
+  index,
+  role,
+  company,
+  logo,
+  photo,
+  date,
+  bigYear,
+  duration,
+  current,
+  bullets,
+  side,
+} = Astro.props;
+---
+
+<section id={anchor} class:list={['entry', `side-${side}`]} data-entry>
+  <div class:list={['card-col', side === 'left' ? 'from-left' : 'from-right']} data-reveal>
+    <article class="card">
+      <div class="card-head">
+        <span class="num idx">{index}</span>
+        {
+          current && (
+            <span class="current-pill">
+              <span class="blip" aria-hidden="true" />
+              Current
+            </span>
+          )
+        }
+      </div>
+
+      <h2 class="d-title role">{role}</h2>
+
+      <div class="company-row">
+        {logo && <img class="logo" src={logo} alt="" width="26" height="26" loading="lazy" />}
+        <span class="company">{company}</span>
+      </div>
+
+      <ul class="bullets">
+        {
+          bullets.map((bullet) => (
+            <li class="bullet">
+              <span class="marker" aria-hidden="true">
+                —
+              </span>
+              <p class="bullet-text">
+                <RichText text={bullet} />
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+    </article>
+  </div>
+
+  <div class="spine-col">
+    <span class="dot" data-dot></span>
+  </div>
+
+  <div class:list={['date-col', side === 'left' ? 'from-right' : 'from-left']} data-reveal>
+    <div class="num big-year">{bigYear}</div>
+    <div class="date-range">{date}</div>
+    <div class="duration">{duration}</div>
+
+    {
+      photo && (
+        <div class="polaroid-wrap">
+          <figure class="polaroid">
+            <img class="polaroid-img" src={photo} alt={company} loading="lazy" />
+            <figcaption class="polaroid-caption">{company}</figcaption>
+          </figure>
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .entry {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr);
+    align-items: start;
+    margin-bottom: 76px;
+  }
+
+  /* --- Column placement ---------------------------------------------------
+     All three children are pinned to row 1 explicitly: DOM order is
+     card → dot → date, so on the mirrored entries the date asks for a column
+     left of the card, and auto-placement would otherwise push it to a new
+     implicit row rather than move backwards. */
+
+  .side-left .card-col { grid-column: 1; grid-row: 1; }
+  .side-left .date-col { grid-column: 3; grid-row: 1; text-align: left; }
+  .side-right .card-col { grid-column: 3; grid-row: 1; }
+  .side-right .date-col { grid-column: 1; grid-row: 1; text-align: right; }
+
+  .date-col {
+    transition-delay: .1s;
+    padding-top: 28px;
+  }
+
+  /* --- Reveal direction ---------------------------------------------------
+     Each column slides in from its own side of the spine. The direction class
+     lives on the animated element itself so `.is-revealed` can override it on
+     equal specificity. */
+
+  .from-left { transform: translate(-26px, 22px); }
+  .from-right { transform: translate(26px, 22px); }
+
+  .is-revealed { transform: none; }
+
+  /* --- Card --------------------------------------------------------------- */
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 30px 32px 32px;
+    position: relative;
+    transition: border-color .35s ease, transform .35s ease;
+  }
+
+  .card:hover {
+    border-color: rgba(var(--accent-rgb), .55);
+    transform: translateY(-3px);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .idx {
+    font-size: 14px;
+    letter-spacing: .08em;
+    color: var(--ink-5);
+  }
+
+  .current-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-body);
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(var(--accent-rgb), .4);
+    border-radius: var(--radius-pill);
+    padding: 4px 10px;
+  }
+
+  .blip {
+    width: 5px;
+    height: 5px;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+    animation: d-blip 1.8s ease-in-out infinite;
+  }
+
+  .role {
+    font-size: clamp(28px, 2.9vw, 42px);
+    line-height: 1.16;
+    margin: 0 0 12px;
+  }
+
+  .company-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .logo {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+    border-radius: 3px;
+    flex: none;
+  }
+
+  .company {
+    font-size: 15px;
+    color: var(--ink-2);
+  }
+
+  /* --- Bullets ------------------------------------------------------------ */
+
+  .bullets {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .bullet {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 2px;
+  }
+
+  .marker {
+    color: var(--ink-6);
+    font-size: 14px;
+    line-height: 1.62;
+  }
+
+  .bullet-text {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.62;
+    color: var(--ink-3);
+    text-wrap: pretty;
+  }
+
+  /* --- Spine dot ---------------------------------------------------------- */
+
+  .spine-col {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 34px;
+  }
+
+  .dot {
+    width: 11px;
+    height: 11px;
+    border-radius: var(--radius-pill);
+    background: var(--bg);
+    border: 1px solid rgba(239, 235, 228, .35);
+    transition: background .4s ease, border-color .4s ease, box-shadow .4s ease;
+  }
+
+  .dot.is-lit {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 5px rgba(var(--accent-rgb), .14);
+  }
+
+  /* --- Date block --------------------------------------------------------- */
+
+  .big-year {
+    font-size: clamp(30px, 3.4vw, 50px);
+    letter-spacing: -.01em;
+    color: var(--ink);
+  }
+
+  .date-range {
+    font-family: var(--font-body);
+    font-size: 12px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-5);
+    margin-top: 10px;
+  }
+
+  .duration {
+    font-family: var(--font-body);
+    font-size: 12px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-6);
+    margin-top: 6px;
+  }
+
+  /* --- Polaroid ------------------------------------------------------------
+     The wrapper centres the frame in the otherwise-empty column instead of
+     letting it hang off the date text's alignment. */
+
+  .polaroid-wrap {
+    text-align: center;
+    margin-top: 40px;
+  }
+
+  .polaroid {
+    display: inline-block;
+    margin: 0;
+    background: #EFEBE4;
+    padding: 10px 10px 38px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+    transition: transform .4s cubic-bezier(.2, .8, .2, 1);
+  }
+
+  .side-left .polaroid { transform: rotate(-3.2deg); }
+  .side-right .polaroid { transform: rotate(3.2deg); }
+
+  .side-left .polaroid:hover,
+  .side-right .polaroid:hover {
+    transform: rotate(0deg);
+  }
+
+  .polaroid-img {
+    display: block;
+    width: 152px;
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .polaroid-caption {
+    width: 152px;
+    margin-top: 10px;
+    font-family: var(--font-display);
+    font-size: 17px;
+    line-height: 1.05;
+    color: #201E1D;
+    text-align: left;
+  }
+
+  /* --- Stacked layout ----------------------------------------------------- */
+
+  @media (max-width: 900px) {
+    .entry {
+      grid-template-columns: minmax(0, 1fr);
+      margin-bottom: 52px;
+    }
+
+    .side-left .card-col,
+    .side-right .card-col,
+    .side-left .date-col,
+    .side-right .date-col {
+      grid-column: 1;
+      grid-row: auto;
+      text-align: left;
+    }
+
+    .from-left,
+    .from-right {
+      transform: translateY(22px);
+    }
+
+    .is-revealed {
+      transform: none;
+    }
+
+    .spine-col {
+      display: none;
+    }
+
+    .date-col {
+      order: -1;
+      padding-top: 0;
+      padding-bottom: 18px;
+    }
+
+    .card {
+      padding: 24px 22px 26px;
+    }
+  }
+</style>

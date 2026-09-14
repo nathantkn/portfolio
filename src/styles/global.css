@@ -1,5 +1,6 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap'); */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap');
 
 @import "tailwindcss";
 
@@ -111,7 +112,8 @@ html {
 }
 
 body {
-  overflow-x: hidden;
+  /* `clip` rather than `hidden` so that `position: sticky` descendants keep working */
+  overflow-x: clip;
   margin: 0;
   padding: 0;
   max-width: 100%;
@@ -367,4 +369,213 @@ body {
     .animate-fade-in {
       animation: fade-in-up 0.6s ease-out;
     }
+}
+/* ==========================================================================
+   Design system — tokens shared by the Projects / Experience / Leadership
+   pages. Single source of truth: no page may declare its own colour, font
+   or radius literals.
+   ========================================================================== */
+
+:root {
+  /* Surfaces */
+  --bg: #0B0B0C;
+  --surface: #121214;
+  --surface-2: #141416;
+
+  /* Ink ramp, lightest to darkest */
+  --ink: #EFEBE4;
+  --ink-2: #C8C3BA;
+  --ink-3: #A8A49C;
+  --ink-4: #8A8781;
+  --ink-5: #6F6C67;
+  --ink-6: #4C4945;
+
+  /* Accent */
+  --accent: #E8552F;
+  --accent-hover: #FF7A55;
+  --accent-rgb: 232, 85, 47;
+
+  /* Rules */
+  --rule: rgba(239, 235, 228, .12);
+  --rule-soft: rgba(239, 235, 228, .09);
+  --rule-faint: rgba(239, 235, 228, .08);
+
+  /* Radii */
+  --radius: 4px;
+  --radius-card: 14px;
+  --radius-chip: 3px;
+  --radius-pill: 999px;
+
+  /* Measure */
+  --maxw: 1360px;
+  --maxw-wide: 1500px;
+
+  /* Type */
+  --font-display: 'Dancing Script', cursive;
+  --font-num: 'Instrument Serif', serif;
+  --font-body: 'Space Grotesk', sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, monospace;
+
+  /* Height of the fixed nav — pages offset their first section by this. */
+  --nav-h: 74px;
+
+  /* Motion */
+  --ease-out-soft: cubic-bezier(.2, .8, .2, 1);
+}
+
+@media (max-width: 640px) {
+  :root {
+    --nav-h: 66px;
+  }
+}
+
+/* --- Page shell ---------------------------------------------------------- */
+
+/* Centred page container. `width: 100%` is load-bearing: `body` is a flex
+   column, and an `auto` cross-axis margin on a flex item suppresses
+   `align-items: stretch` — without it the container shrinks to fit its
+   content instead of filling the viewport. Pages set their own max-width and
+   padding on top of this. */
+.shell {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+.design-page {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: clip;
+}
+
+/* --- Display titles ------------------------------------------------------ */
+
+/* Script faces need air: never track tighter than -.01em, and give the big
+   sizes a full 1.0 line-height. */
+.d-h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.01em;
+  margin: 0;
+  will-change: transform;
+}
+
+.d-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+/* --- Numerals ------------------------------------------------------------ */
+
+.num {
+  font-family: var(--font-num);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* --- Small uppercase labels --------------------------------------------- */
+
+.label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-5);
+}
+
+.label-xs {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-5);
+}
+
+/* --- Body copy ---------------------------------------------------------- */
+
+.copy {
+  font-size: 18px;
+  line-height: 1.62;
+  color: var(--ink-2);
+  text-wrap: pretty;
+  max-width: 52ch;
+  margin: 0;
+}
+
+/* --- Section head rule -------------------------------------------------- */
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.section-head .fill {
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* --- Scroll reveal ------------------------------------------------------- */
+
+[data-reveal] {
+  opacity: 0;
+  transition:
+    opacity .8s var(--ease-out-soft),
+    transform .8s var(--ease-out-soft);
+}
+
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- Shared keyframes ---------------------------------------------------- */
+
+@keyframes d-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes d-sheet-in {
+  from { opacity: 0; transform: translateY(30px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes d-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes d-bar-grow {
+  from { transform: scaleX(0); opacity: .2; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+@keyframes d-blip {
+  0%, 100% { opacity: .35; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none;
+  }
+
+  .design-page *,
+  .design-page *::before,
+  .design-page *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

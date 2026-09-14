@@ -1,143 +1,392 @@
 ---
-import "../styles/global.css";
-import Layout from '../layouts/Layout.astro';
+import DesignLayout from '../layouts/DesignLayout.astro';
+import TimelineEntry from '../components/TimelineEntry.astro';
+import { EXPERIENCE } from '../data/portfolio';
+import {
+  DOMAIN_START,
+  DOMAIN_SPAN,
+  DOMAIN_YEARS,
+  currentMonthIndex,
+  durationLabel,
+  isCurrent,
+  rangeOf,
+} from '../lib/dates';
 
-const experienceList = [
-    {
-        date:"July 2025 - Present", 
-        role:"Web Development Team Lead", 
-        company:"SparkHacks", 
-        desc:[
-            "Lead design and full-stack development of SparkHacks 2026’s main website, providing event information and registration access for <strong>400+</strong> participants, sponsors, mentors, and organizers.",
-            "Enhance an admin dashboard backed by Firestore to aggregate, search, and filter <strong>500+</strong> records, with live analytics displaying acceptance rates, demographic breakdowns, and check-in progress.",
-            "Manage Agile sprints and peer programming reviews across a 6-member development team, managing version control, code quality, and consistency through CI workflows.",
-        ]
-    },
-    {
-        date:"May 2025 - Present", 
-        role:"Research Assistant", 
-        company:"UIC ELiCIT Lab", 
-        desc:[
-            "Design <strong>60+</strong> low-fidelity wireframes screens to lead development of an interactive AI literacy educational app, teaching children aged 8-12 privacy concepts through puzzle-solving mechanics.",
-            "Collaborate with a PhD student and an Assistant Professor to align technical implementation with research objectives."
-        ]
-    },
-    {
-        date:"January 2025 - Present", 
-        role:"Undergraduate Teaching Assistant", 
-        company:"UIC College of Engineering", 
-        desc:[
-            "Mentor <strong>400+</strong> students in C++ data structures and algorithmic problem-solving, offering course material and project support during lecture assistance and weekly in-person office hours.",
-            "Assist in weekly lab sessions for <strong>30+</strong> students, covering complex concepts such as binary trees, hash tables, graph algorithms, and searching & sorting techniques.",
-            "Guide students in using tools such as LLDB, ASAN, and GoogleTest to improve unit testing and debugging skills."
-        ]
-    },
-    {
-        date:"June 2024 - Aug 2024", 
-        role:"Software Developer Intern", 
-        company:"Viettel Digital", 
-        desc:[
-            "Developed RESTful APIs for user interaction in PHP, Spring and Yii for an integrated Fintech social network system, increasing engagement and connectivity for over <strong>24 million users</strong>.",
-            "Implemented JWT and OAuth 2.0 for secure, role-based API authentication and authorization across users, merchants, and admins, enhancing security and system performance.",
-            "Improved database performance by <strong>40%</strong> through optimized query optimization and API validation with Postman."
-        ]
-    },
-    {
-        date:"January 2024 - Present", 
-        role:"CS Tutor", 
-        company:"UIC Engineering Learning Center", 
-        desc:[
-            "Provide academic support and peer guidance availability to <strong>1500+</strong> students for multiple core Computer Science courses.",
-            "Enhance students' understanding of complex core concepts through instruction, study techniques, and supplementary test preparation."
-        ]
-    },
-    {
-        date:"July 2023 - Aug 2023", 
-        role:"Software Developer Intern", 
-        company:"VISSOFT", 
-        desc:[
-            "Adapted the Bloom Filter algorithm for fast data retrieval, reducing lookup time and cutting memory usage by <strong>80%</strong> in a Java-based library management system with a MySQL backend.",
-            "Integrated the GoogleTest framework to develop <strong>20+</strong> unit tests, ensuring functionality through automated testing."
-        ]
-    }
-]
+// "Present" and the Today marker are resolved from the clock, not hard-coded.
+const nowIndex = currentMonthIndex(new Date());
 
+const pct = (months: number) => `${((months / DOMAIN_SPAN) * 100).toFixed(2)}%`;
+
+const roles = EXPERIENCE.map((role, i) => {
+  const range = rangeOf(role.date, nowIndex);
+  const months = Math.max(1, range.end - range.start);
+
+  return {
+    ...role,
+    anchor: `role-${i}`,
+    index: String(i + 1).padStart(2, '0'),
+    current: isCurrent(role.date),
+    bigYear: String(Math.floor(range.start / 12)),
+    duration: durationLabel(months),
+    side: (i % 2 === 0 ? 'left' : 'right') as 'left' | 'right',
+    barLeft: pct(range.start - DOMAIN_START),
+    barWidth: pct(range.end - range.start),
+  };
+});
+
+const todayLeft = pct(nowIndex - DOMAIN_START);
+
+const meta = [
+  '3 SWE internships',
+  '2 teaching assistant roles',
+  '1 HCI research role',
+];
 ---
 
-<Layout>
-    <div class="min-h-screen bg-gradient-to-br from-slate-900 via-gray-800 to-slate-800 text-white">
-        <div class="container mx-auto px-4 md:px-6 py-8 md:py-16 max-w-5xl">
-            <div class="text-center mb-8 md:mb-16">
-                <h1 class="text-sky-400 font-bold font-dancing text-6xl md:text-8xl lg:text-9xl mb-4 bg-gradient-to-r from-sky-400 to-blue-500 bg-clip-text text-transparent">
-                    Experience
-                </h1>
-                <div class="w-32 md:w-60 h-1 bg-gradient-to-r from-sky-500 to-blue-600 mx-auto rounded-full"></div>
-            </div>
+<DesignLayout
+  title="Nathan Trinh"
+  description="Nathan Trinh's engineering, research and teaching roles."
+  active="experience"
+>
+  <div class="progress" data-progress></div>
 
-            <div class="relative mt-5">
-                <div class="absolute left-2 md:left-0 top-0 bottom-0 w-0.5 md:w-1 bg-sky-700"></div>
-                
-                <div class="flex flex-col gap-6 md:gap-8">
-                    {experienceList.map((item, index) => (
-                        <div class="flex flex-col pl-6 md:pl-8 relative">
-                            <div class="absolute left-[1px] md:-left-[0.6rem] w-4 h-4 md:w-6 md:h-6 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 mt-1 border-2 md:border-4 border-slate-800"></div>
+  <header class="shell hero">
+    <div class="hero-row">
+      <h1 class="d-h1 hero-title" data-hero>My<br /><em>work experience</em></h1>
+      <div class="meta">
+        {meta.map((line) => <span>{line}</span>)}
+      </div>
+    </div>
+  </header>
 
-                            <div class="mb-3">
-                                <h3 class="text-xl md:text-2xl lg:text-3xl font-bold font-poppins text-white mb-2 hover:text-sky-500 transition-colors duration-300">
-                                    {item.role}
-                                </h3>
-                                <p class="text-base md:text-lg lg:text-xl text-sky-300 font-medium flex items-center">
-                                    {item.company}
-                                </p>
-                            </div>
-
-                            <p class="text-white text-xs md:text-sm font-semibold mb-4 rounded-full">
-                                {item.date}
-                            </p>
-
-                            <ul class="space-y-3 md:space-y-4">
-                                {item.desc.map((bullet) => (
-                                    <li class="flex items-start group/item">
-                                        <span class="text-gray-200 leading-relaxed text-sm md:text-base lg:text-lg group-hover/item:text-white transition-colors duration-200" set:html={bullet}></span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
+  <!-- Part 1 — overlap map -->
+  <section class="shell overlap">
+    <div class="section-head">
+      <span class="label-xs">The timeline</span>
+      <span class="fill"></span>
+      <span class="label-xs">Click a bar for more info</span>
     </div>
 
-    <style>
-        .font-dancing {
-            background-size: 200% 200%;
-            animation: gradient-shift 3s ease-in-out infinite;
-        }
-        
-        @keyframes gradient-shift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
+    <div class="gantt" data-reveal>
+      <div class="gutters" aria-hidden="true">
+        <div></div><div></div><div></div><div class="last"></div>
+      </div>
 
-        .absolute.rounded-full {
-            animation: pulse-glow 2s ease-in-out infinite;
-        }
-        
-        @keyframes pulse-glow {
-            0%, 100% { 
-                box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
-            }
-            50% { 
-                box-shadow: 0 0 30px rgba(56, 189, 248, 0.5);
-            }
-        }
+      <div class="year-row" aria-hidden="true">
+        {DOMAIN_YEARS.map((year) => <span class="year-label">{year}</span>)}
+      </div>
 
-        @media (max-width: 768px) {
-            .absolute.rounded-full {
-                animation: none;
-                box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
-            }
+      <div class="bars">
+        {
+          roles.map((role) => (
+            <div class="bar-row">
+              <button
+                class:list={['bar', { 'is-current': role.current }]}
+                type="button"
+                data-jump={role.anchor}
+                title={`${role.role} · ${role.company}`}
+                style={`left: ${role.barLeft}; width: ${role.barWidth};`}
+              >
+                {role.role}
+              </button>
+            </div>
+          ))
         }
-    </style>
-</Layout>
+      </div>
+
+      <div class="today" style={`left: ${todayLeft};`}>
+        <span class="today-label">Today</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Part 2 — centre-spine timeline -->
+  <main class="shell timeline" data-timeline>
+    <div class="spine" aria-hidden="true"></div>
+    <div class="spine-fill" data-spine-fill aria-hidden="true"></div>
+
+    {roles.map((role) => <TimelineEntry {...role} />)}
+  </main>
+</DesignLayout>
+
+<style>
+  /* --- Scroll progress ----------------------------------------------------- */
+
+  .progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    width: 0;
+    background: var(--accent);
+    z-index: 60;
+    will-change: width;
+  }
+
+  /* --- Header -------------------------------------------------------------- */
+
+  .hero {
+    padding: 116px 40px 52px;
+    max-width: var(--maxw);
+    margin: 0 auto;
+  }
+
+  .hero-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .hero-title {
+    font-size: clamp(60px, 11vw, 150px);
+  }
+
+  .hero-title em {
+    color: var(--accent);
+  }
+
+  .meta {
+    padding-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-5);
+  }
+
+  .meta-lede {
+    color: var(--ink-3);
+  }
+
+  /* --- Overlap map --------------------------------------------------------- */
+
+  .overlap {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 40px 20px;
+  }
+
+  .section-head {
+    margin-bottom: 22px;
+  }
+
+  .section-head .label-xs {
+    letter-spacing: .18em;
+  }
+
+  .gantt {
+    position: relative;
+    padding: 26px 0 8px;
+    transform: translateY(20px);
+    transition-duration: .7s;
+  }
+
+  .gantt.is-revealed {
+    transform: none;
+  }
+
+  .gutters {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    pointer-events: none;
+  }
+
+  .gutters > div {
+    border-left: 1px solid var(--rule-soft);
+  }
+
+  .gutters > .last {
+    border-right: 1px solid var(--rule-soft);
+  }
+
+  .year-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-bottom: 14px;
+  }
+
+  .year-label {
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: .16em;
+    color: var(--ink-5);
+    padding-left: 10px;
+  }
+
+  .bars {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    position: relative;
+  }
+
+  .bar-row {
+    position: relative;
+    height: 38px;
+  }
+
+  .bar {
+    position: absolute;
+    top: 0;
+    height: 38px;
+    transform-origin: left center;
+    animation: d-bar-grow .85s var(--ease-out-soft) both;
+    border: 0;
+    border-radius: var(--radius-chip);
+    cursor: pointer;
+    background: rgba(239, 235, 228, .16);
+    color: var(--ink-2);
+    font-family: var(--font-body);
+    font-size: 12px;
+    letter-spacing: .04em;
+    text-align: left;
+    padding: 0 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    transition: filter .25s ease;
+  }
+
+  .bar.is-current {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .bar:hover,
+  .bar:focus-visible {
+    filter: brightness(1.18);
+  }
+
+  .today {
+    position: absolute;
+    top: 26px;
+    bottom: 8px;
+    width: 1px;
+    background: rgba(var(--accent-rgb), .55);
+  }
+
+  .today-label {
+    position: absolute;
+    top: -18px;
+    left: 6px;
+    font-family: var(--font-body);
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* --- Timeline ------------------------------------------------------------ */
+
+  .timeline {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 76px 40px 130px;
+    position: relative;
+  }
+
+  .spine,
+  .spine-fill {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 1px;
+    transform: translateX(-.5px);
+  }
+
+  .spine {
+    bottom: 0;
+    background: var(--rule);
+  }
+
+  .spine-fill {
+    height: 0;
+    background: linear-gradient(to bottom, rgba(var(--accent-rgb), .15), var(--accent));
+    will-change: height;
+  }
+
+  @media (max-width: 900px) {
+    .hero {
+      padding: 72px 20px 40px;
+    }
+
+    .overlap {
+      padding: 0 20px 20px;
+    }
+
+    .timeline {
+      padding: 48px 20px 90px;
+    }
+
+    /* The spine only makes sense while entries alternate around it. */
+    .spine,
+    .spine-fill {
+      display: none;
+    }
+
+    .bar {
+      font-size: 11px;
+      padding: 0 10px;
+    }
+  }
+</style>
+
+<script>
+  import { onScrollFrame, makeRevealSweep, parallaxHero } from '../lib/scroll';
+
+  const progress = document.querySelector<HTMLElement>('[data-progress]');
+  const timeline = document.querySelector<HTMLElement>('[data-timeline]');
+  const spineFill = document.querySelector<HTMLElement>('[data-spine-fill]');
+  const entries = [...document.querySelectorAll<HTMLElement>('[data-entry]')];
+
+  const heroFrame = parallaxHero(document.querySelector<HTMLElement>('[data-hero]'));
+  const sweep = makeRevealSweep(0.92);
+
+  onScrollFrame(() => {
+    heroFrame();
+
+    // Top progress bar.
+    if (progress) {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = `${max > 0 ? (window.scrollY / max) * 100 : 0}%`;
+    }
+
+    // Spine fill grows to the viewport midpoint, clamped to the container.
+    if (timeline && spineFill) {
+      const rect = timeline.getBoundingClientRect();
+      const reach = window.innerHeight * 0.5 - rect.top;
+      spineFill.style.height = `${Math.max(0, Math.min(rect.height, reach))}px`;
+    }
+
+    // Light each dot once its entry crosses the midpoint.
+    const mid = window.innerHeight * 0.5;
+    for (const entry of entries) {
+      const rect = entry.getBoundingClientRect();
+      const dot = entry.querySelector<HTMLElement>('[data-dot]');
+      dot?.classList.toggle('is-lit', rect.top < mid && rect.bottom > 0);
+    }
+
+    sweep();
+  });
+
+  // Clicking a Gantt bar jumps to that role's card.
+  for (const bar of document.querySelectorAll<HTMLElement>('[data-jump]')) {
+    bar.addEventListener('click', () => {
+      const target = document.getElementById(bar.dataset.jump ?? '');
+      if (!target) return;
+      window.scrollTo({
+        top: window.scrollY + target.getBoundingClientRect().top - 120,
+        behavior: 'smooth',
+      });
+    });
+  }
+</script>

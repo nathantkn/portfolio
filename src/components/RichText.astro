@@ -1,0 +1,24 @@
+---
+/**
+ * Renders a `<strong>`-annotated content string as escaped text segments,
+ * giving emphasised runs the accent-underline treatment.
+ */
+import { parseRich } from '../lib/richtext';
+
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+const segments = parseRich(text);
+---
+
+{segments.map((s) => (s.bold ? <strong class="rt-strong">{s.text}</strong> : <Fragment>{s.text}</Fragment>))}
+
+<style>
+  .rt-strong {
+    color: var(--ink);
+    font-weight: 600;
+    border-bottom: 1px solid rgba(var(--accent-rgb), .6);
+  }
+</style>

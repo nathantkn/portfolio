@@ -1,0 +1,107 @@
+---
+/**
+ * The one nav shared by every page. It is fixed and transparent — it floats
+ * over page content, so heroes can run full-bleed underneath it. Pages that
+ * shouldn't sit under it offset their first section by `--nav-h`.
+ */
+interface Props {
+  /** Which link renders as the current page. */
+  active: 'about' | 'projects' | 'experience' | 'leadership';
+}
+
+const { active } = Astro.props;
+
+const links = [
+  { id: 'about', label: 'about', href: '/' },
+  { id: 'projects', label: 'projects', href: '/projects' },
+  { id: 'experience', label: 'experience', href: '/experience' },
+  { id: 'leadership', label: 'leadership', href: '/leadership' },
+] as const;
+---
+
+<nav class="site-nav">
+  <a class="wordmark" href="/">Nathan Trinh</a>
+  <div class="links">
+    {
+      links.map((link) => (
+        <a
+          href={link.href}
+          class:list={['nav-link', { 'is-active': link.id === active }]}
+          aria-current={link.id === active ? 'page' : undefined}
+        >
+          {link.label}
+        </a>
+      ))
+    }
+  </div>
+</nav>
+
+<style>
+  .site-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px 32px;
+  }
+
+  .wordmark {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: 0;
+    color: var(--ink);
+    text-decoration: none;
+    /* Keeps the name readable where it crosses imagery. */
+    text-shadow: 0 2px 12px rgba(0, 0, 0, .6);
+  }
+
+  /* The pill is the only surface in the nav — it carries its own backdrop. */
+  .links {
+    display: flex;
+    gap: 8px;
+    padding: 4px;
+    border-radius: var(--radius-pill);
+    background: rgba(13, 15, 20, .55);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(245, 243, 239, .1);
+  }
+
+  .nav-link {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 7px 13px;
+    border-radius: var(--radius-pill);
+    color: #9A968E;
+    text-decoration: none;
+    transition: color .2s ease, background .2s ease;
+  }
+
+  .nav-link:hover {
+    color: #F5F3EF;
+    background: rgba(245, 243, 239, .08);
+  }
+
+  .nav-link.is-active {
+    color: #0D0F14;
+    background: #F5F3EF;
+  }
+
+  @media (max-width: 640px) {
+    .site-nav {
+      padding: 16px 20px;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      font-size: 11px;
+      padding: 6px 10px;
+    }
+  }
+</style>

@@ -1,148 +1,117 @@
 ---
-import "../styles/global.css";
-import Layout from '../layouts/Layout.astro';
+import DesignLayout from '../layouts/DesignLayout.astro';
+import LeadershipSection from '../components/LeadershipSection.astro';
+import { LEADERSHIP } from '../data/portfolio';
 
-
-const leadershipData = [
-{
-        role: "Web Development Team Lead",
-        organization: "SparkHacks 2026",
-        date: "July 2025 - February 2026",
-        logo: "/sparkhacks.svg",
-        groupImage: "/sparkhacks_team26.jpg",
-        imageCaption: "The SparkHacks 2026 team!",
-        description: [
-            "For SparkHacks 2026, I stepped into the role of <strong>Web Development Team Lead</strong>, leading the design and development of the website and dashboard system.",
-            "The experience has been nothing short of amazing. I've learned so much about project management and leadership, and I've had the opportunity to work with the most talented team.",
-        ],
-        stats: [
-            { num: "700+", subtext: "dashboard users" },
-            { num: "300+", subtext: "accepted hackers" },
-            { num: "100%", subtext: "website uptime" }
-        ]
-    },
-    {
-        role: "Logistics Organizer",
-        organization: "SparkHacks 2025",
-        date: "August 2024 - February 2025",
-        logo: "/sparkhacks.svg",
-        groupImage: "/sparkhacks_team25.jpg",
-        imageCaption: "The SparkHacks 2025 dream team :)",
-        description: [
-            "SparkHacks is UIC's very own student-led, 24-hour hackathon! I joined the <strong>Logistics Team</strong> for SparkHacks 2025, helping make sure everything ran smoothly for our participants.",
-            "Being the very first hackathon I ever attended, SparkHacks has always been an fascinating experience for me. Seeing how supportive and innovative this community could be has always given me the motivation to keep pushing forward in my journey, and I wish to do the same for others through my role.",
-        ],
-        stats: [
-            { num: "400+", subtext: "hackers" },
-            { num: "93%", subtext: "retention rate" },
-            { num: "$30,000+", subtext: "sponsorship funding" }
-        ]
-    },
-    {
-        role: "Event Organizer",
-        organization: "Vietnamese International Student Association (VISA) at UIC",
-        date: "January 2025 - July 2025",
-        logo: "/visa.png",
-        groupImage: "/visa_tet.JPG",
-        imageCaption: "The VISA team, celebrating Once Upon A Tết 2025",
-        description: [
-            "VISA is a cultural and social organization that aims to connect Vietnamese international students at UIC and promote Vietnamese culture on campus. I served as an <strong>Event Organizer</strong> for the Spring 2025 semester.",
-            "Being part of VISA has been such a rewarding way to connect with fellow students at UIC, some of whom have become my closest friends. From brainstorming event ideas to seeing people come together and have lasting memories, it has truly been a fulfilling experience!",
-        ],
-        stats: [
-            { num: "100+", subtext: "average participants in major events" },
-            { num: "5+", subtext: "total events hosted" },
-            { num: "$2,000+", subtext: "fundraised" }
-        ]
-    }
-]
+const meta = ['The 3 teams I helped lead', 'throughout my time at UIC'];
 ---
 
-<Layout>
-    <div class="min-h-screen bg-gradient-to-br from-slate-900 via-gray-800 to-slate-800 text-white">
-        <div class="container mx-auto px-6 py-16 max-w-5xl">
-            <div class="text-center mb-16">
-                <h1 class="text-sky-400 font-bold font-dancing text-6xl md:text-8xl lg:text-9xl mb-4 bg-gradient-to-r from-sky-400 to-blue-500 bg-clip-text text-transparent">
-                    Leadership
-                </h1>
-                <div class="w-24 h-1 bg-gradient-to-r from-sky-500 to-blue-600 mx-auto rounded-full"></div>
-            </div>
-
-            <div class="space-y-12">
-                {leadershipData.map((item, index) => (
-                    <div class="w-full">
-                        <div class="bg-gradient-to-br from-slate-800/80 to-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-2xl border border-slate-700/50 hover:border-sky-500/30 transition-all duration-300 hover:shadow-sky-500/10 hover:scale-[1.01] group">
-                            <div class="flex flex-col lg:flex-row gap-8">
-                                <div class="flex-1">
-                                    <div class="mb-6">
-                                        <div class="flex items-center gap-3 mb-3">
-                                            <img src={item.logo} alt={`${item.organization} logo`} class="w-10 h-10 object-contain" />
-                                            <h3 class="text-3xl md:text-4xl font-bold font-poppins text-white group-hover:text-sky-300 transition-colors duration-300">
-                                                {item.role}
-                                            </h3>
-                                        </div>
-                                        <p class="text-xl md:text-2xl text-sky-300 font-medium ml-13 mb-3">
-                                            {item.organization}
-                                        </p>
-                                        <p class="text-white text-sm font-medium ml-13">
-                                            {item.date}
-                                        </p>
-                                    </div>
-
-                                    <div class="space-y-4">
-                                        {item.description.map((desc) => (
-                                            <p class="text-gray-200 text-lg group-hover:text-white transition-colors duration-200" set:html={desc}></p>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div class="flex-1 flex justify-center">
-                                    <div class="w-full max-w-lg">
-                                        <div class="relative overflow-hidden rounded-xl h-60 lg:h-80">
-                                            <img 
-                                                src={item.groupImage} 
-                                                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                            />
-                                            <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                                        </div>
-                                        <p class="text-gray-400 text-sm italic mt-4 text-center">
-                                            {item.imageCaption}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mt-8 pt-6 border-t border-slate-600/30">
-                                <h4 class="text-sky-300 mb-3 text-center text-5xl font-dancing">Achievements</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    {item.stats.map((stat) => (
-                                        <div class="text-center p-6 bg-slate-700/40 border border-slate-600/40 rounded-lg hover:border-sky-500/40 transition-all duration-300">
-                                            <div class="text-4xl md:text-5xl font-bold text-sky-400 mb-2">
-                                                {stat.num}
-                                            </div>
-                                            <div class="text-gray-300 text-sm uppercase tracking-widest font-medium">
-                                                {stat.subtext}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
+<DesignLayout
+  title="Nathan Trinh"
+  description="Teams and student organizations Nathan Trinh has helped lead."
+  active="leadership"
+>
+  <header class="shell hero">
+    <div class="hero-row">
+      <h1 class="d-h1 hero-title" data-hero>My<br /><em>leadership roles</em></h1>
+      <div class="meta">
+        {meta.map((line) => <span>{line}</span>)}
+      </div>
     </div>
+  </header>
 
-    <style>
-        .font-dancing {
-            background-size: 200% 200%;
-            animation: gradient-shift 3s ease-in-out infinite;
-        }
-        
-        @keyframes gradient-shift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-    </style>
-</Layout>
+  <main class="shell orgs">
+    {LEADERSHIP.map((entry, i) => <LeadershipSection entry={entry} index={i} />)}
+  </main>
+</DesignLayout>
+
+<style>
+  .hero {
+    padding: 120px 40px 64px;
+    max-width: var(--maxw);
+    margin: 0 auto;
+  }
+
+  .hero-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .hero-title {
+    font-size: clamp(60px, 11vw, 170px);
+  }
+
+  .hero-title em {
+    color: var(--accent);
+  }
+
+  .meta {
+    padding-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-5);
+  }
+
+  .orgs {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 40px 120px;
+  }
+
+  @media (max-width: 900px) {
+    .hero {
+      padding: 72px 20px 40px;
+    }
+
+    .orgs {
+      padding: 0 20px 80px;
+    }
+  }
+</style>
+
+<script>
+  import {
+    onScrollFrame,
+    makeRevealSweep,
+    parallaxHero,
+    countUp,
+    prefersReducedMotion,
+  } from '../lib/scroll';
+
+  const heroFrame = parallaxHero(document.querySelector<HTMLElement>('[data-hero]'), -0.16);
+
+  // Impact counters run once, when their section reveals.
+  const sweep = makeRevealSweep(0.92, (section) => {
+    for (const figure of section.querySelectorAll<HTMLElement>('[data-count-target]')) {
+      countUp(figure);
+    }
+  });
+
+  const frames = prefersReducedMotion()
+    ? []
+    : [...document.querySelectorAll<HTMLElement>('[data-parallax]')];
+
+  onScrollFrame(() => {
+    heroFrame();
+
+    // Photos drift with the frame's distance from the viewport centre.
+    const vh = window.innerHeight;
+    for (const frame of frames) {
+      const rect = frame.getBoundingClientRect();
+      if (rect.bottom < -200 || rect.top > vh + 200) continue;
+      const p = (rect.top + rect.height / 2 - vh / 2) / vh;
+      const img = frame.querySelector<HTMLElement>('img');
+      if (img) img.style.transform = `translate3d(0, ${(p * 7).toFixed(2)}%, 0)`;
+    }
+
+    sweep();
+  });
+</script>

@@ -1,0 +1,52 @@
+---
+/** Footer shared by the redesigned pages. */
+---
+
+<footer class="site-footer">
+  <span>Portfolio built by Nathan Trinh</span>
+  <div class="social">
+    <a href="https://www.linkedin.com/in/khoi-nguyen-trinh/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    <a href="https://github.com/nathantkn" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="mailto:trkhoinguyen.ptcnn@gmail.com">Email</a>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--rule);
+    padding: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--ink-5);
+    max-width: var(--maxw);
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .social {
+    display: flex;
+    gap: 22px;
+  }
+
+  .social a {
+    color: var(--ink-4);
+    text-decoration: none;
+    transition: color .2s ease;
+  }
+
+  .social a:hover {
+    color: var(--accent-hover);
+  }
+
+  @media (max-width: 640px) {
+    .site-footer {
+      padding: 32px 20px;
+    }
+  }
+</style>

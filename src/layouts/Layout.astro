@@ -1,6 +1,14 @@
 ---
-import NavBar from "../components/NavBar.astro"
+import "../styles/global.css";
+import SiteNav from "../components/SiteNav.astro";
 import Footer from "../components/Footer.astro";
+
+interface Props {
+	/** Which nav link renders as the current page. */
+	active?: 'about' | 'projects' | 'experience' | 'leadership';
+}
+
+const { active = 'about' } = Astro.props;
 ---
 
 <!doctype html>
@@ -14,7 +22,8 @@ import Footer from "../components/Footer.astro";
 		<title>Nathan Trinh's Portfolio</title>
 	</head>
 	<body>
-		<NavBar/>
+		<SiteNav active={active} />
+		<!-- No top offset: the About hero is meant to run full-bleed under the nav. -->
 		<main>
 			<slot />
 		</main>

@@ -1,0 +1,59 @@
+---
+/**
+ * Shell for the redesigned pages: one nav, one footer, one token set.
+ * The About page keeps using `Layout.astro`.
+ */
+import '../styles/global.css';
+import SiteNav from '../components/SiteNav.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  active: 'about' | 'projects' | 'experience' | 'leadership';
+}
+
+const { title, description, active } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body class="design-page">
+    <SiteNav active={active} />
+    <slot />
+    <SiteFooter />
+  </body>
+</html>
+
+<style is:global>
+  /* The nav is fixed, so it no longer occupies layout space — the first
+     section of these pages would otherwise start underneath it. */
+  .design-page {
+    padding-top: var(--nav-h);
+  }
+
+  /* Link colour for the redesigned pages only. */
+  .design-page a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .design-page a:hover {
+    color: var(--accent-hover);
+  }
+
+  /* Body scroll lock while the project detail overlay is open. */
+  html.scroll-locked {
+    overflow: hidden;
+  }
+</style>
