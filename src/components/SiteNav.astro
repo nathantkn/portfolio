@@ -68,29 +68,33 @@ const links = [
     gap: 8px;
     padding: 4px;
     border-radius: var(--radius-pill);
-    background: rgba(13, 15, 20, .55);
+    background: rgba(11, 11, 12, .55);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(245, 243, 239, .1);
+    border: 1px solid var(--rule);
   }
 
+  /* Same face as the hero CTAs, one weight lighter — the uppercase and the
+     tight tracking already make 12px read denser than the 14px CTA text. */
   .nav-link {
-    font-family: var(--font-mono);
+    font-family: var(--font-body);
+    font-weight: 400;
     font-size: 12px;
+    letter-spacing: .08em;
     padding: 7px 13px;
     border-radius: var(--radius-pill);
-    color: #9A968E;
+    color: var(--ink-4);
     text-decoration: none;
     transition: color .2s ease, background .2s ease;
   }
 
   .nav-link:hover {
-    color: #F5F3EF;
-    background: rgba(245, 243, 239, .08);
+    color: var(--ink);
+    background: rgba(var(--ink-rgb), .08);
   }
 
   .nav-link.is-active {
-    color: #0D0F14;
-    background: #F5F3EF;
+    color: var(--bg);
+    background: var(--ink);
   }
 
   @media (max-width: 640px) {

@@ -1,11 +1,10 @@
-/* @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap'); */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&display=swap');
 
 @import "tailwindcss";
 
 @layer base {
+  /* Self-hosted from `src/assets` so the hero name is fingerprinted and
+     bundled by Vite rather than served unhashed out of `public/`. */
   @font-face {
     font-family: 'Dancing Script';
     font-style: normal;
@@ -13,8 +12,6 @@
     font-display: block;
     src: url('/fonts/DancingScript-Regular.ttf') format('truetype');
   }
-  /* Self-hosted from `src/assets` so the hero name is fingerprinted and
-     bundled by Vite rather than served unhashed out of `public/`. */
   @font-face {
     font-family: 'Dancing Script';
     font-style: normal;
@@ -22,361 +19,13 @@
     font-display: swap;
     src: url('../assets/fonts/DancingScript-Bold.ttf') format('truetype');
   }
-  @font-face {
-    font-family: 'Northwell';
-    font-style: normal;
-    font-weight: 400;
-    font-display: block;
-    src: url('/fonts/Northwell-Regular.ttf') format('truetype');
-  }
 }
 
-@theme {
-  /* Custom Color Palette */
-  --color-accent-black: #1a1a1a;
-  --color-accent-red: #dc2626;
-  --color-snowhite: #ffffff;
-  --color-dark-red: #991b1b;
-  
-  /* Glassmorphism colors */
-  --color-glass-bg: rgba(255, 255, 255, 0.1);
-  --color-glass-border: rgba(255, 255, 255, 0.2);
-  --color-glass-hover: rgba(255, 255, 255, 0.15);
-  
-  /* Gradient backgrounds */
-  --gradient-purple: linear-gradient(135deg, #1e293b 0%, #7c3aed 50%, #1e293b 100%);
-  --gradient-slate-purple: linear-gradient(to bottom right, #0f172a, #581c87, #1e293b);
-}
-
-/* Font Families */
-@layer utilities {
-    .font-dancing {
-        font-family: 'Dancing Script', cursive;
-    }
-
-    .font-poppins {
-        font-family: 'Poppins', sans-serif;
-    }
-
-    .text-poppins {
-        font-family: 'Poppins', sans-serif;
-    }
-    .font-northwell {
-        font-family: 'Northwell', sans-serif;
-    }
-}
-
-/* Custom Colors */
-.text-accent-black {
-  color: var(--color-accent-black);
-}
-
-.text-accent-red {
-  color: var(--color-accent-red);
-}
-
-.text-snowhite {
-  color: var(--color-snowhite);
-}
-
-.text-dark-red {
-  color: var(--color-dark-red);
-}
-
-.bg-snowhite {
-  background-color: var(--color-snowhite);
-}
-
-.border-accent-red {
-  border-color: var(--color-accent-red);
-}
-
-.bg-accent-red {
-  background-color: var(--color-accent-red);
-}
-
-.hover\:bg-accent-red:hover {
-  background-color: var(--color-accent-red);
-}
-
-.hover\:text-snowhite:hover {
-  color: var(--color-snowhite);
-}
-
-.shadow-accent-red\/25 {
-  --tw-shadow-color: rgba(220, 38, 38, 0.25);
-  --tw-shadow: var(--tw-shadow-colored);
-}
-
-/* Global Styles */
-html {
-  scroll-behavior: smooth;
-  max-width: 100%;
-}
-
-body {
-  /* `clip` rather than `hidden` so that `position: sticky` descendants keep working */
-  overflow-x: clip;
-  margin: 0;
-  padding: 0;
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Glassmorphism Effects */
-.glass {
-  background: var(--color-glass-bg);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--color-glass-border);
-  border-radius: 1rem;
-}
-
-.glass-hover {
-  transition: all 0.3s ease;
-}
-
-.glass-hover:hover {
-  background: var(--color-glass-hover);
-  transform: translateY(-8px);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-/* Animation Keyframes */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(124, 58, 237, 0.6);
-  }
-}
-
-/* Animation Classes */
-.animate-fade-in {
-  animation: fade-in 1s ease-out;
-}
-
-.animate-slide-in-right {
-  animation: slide-in-right 0.8s ease-out;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-/* Button Hover Effects */
-.btn-hover-effect {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.btn-hover-effect::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.7s ease;
-}
-
-.btn-hover-effect:hover::before {
-  left: 100%;
-}
-
-/* Skill Badge Styles */
-.skill-badge {
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  border: 1px solid;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-.skill-badge:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Photo Frame Effects */
-.photo-frame {
-  background: var(--color-glass-bg);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--color-glass-border);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  transition: all 0.3s ease;
-}
-
-.photo-frame:hover {
-  background: var(--color-glass-hover);
-  transform: translateY(-8px);
-  box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.4);
-}
-
-.photo-frame img {
-  border-radius: 0.5rem;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Photo hover effects with different color glows */
-.photo-frame-purple:hover {
-  box-shadow: 0 32px 64px -12px rgba(168, 85, 247, 0.4);
-}
-
-.photo-frame-pink:hover {
-  box-shadow: 0 32px 64px -12px rgba(236, 72, 153, 0.4);
-}
-
-.photo-frame-blue:hover {
-  box-shadow: 0 32px 64px -12px rgba(59, 130, 246, 0.4);
-}
-
-/* Responsive Design Helpers */
-@media (max-width: 768px) {
-  .glass {
-    backdrop-filter: blur(8px);
-  }
-  
-  .photo-frame {
-    padding: 1rem;
-  }
-  
-  /* Disable parallax on mobile for better performance */
-  .bg-fixed {
-    background-attachment: scroll !important;
-  }
-}
-
-/* Utility Classes */
-.text-shadow {
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.backdrop-blur-strong {
-  backdrop-filter: blur(20px);
-}
-
-.gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-@layer components {
-  .font-dancing {
-      background-size: 200% 200%;
-      animation: gradient-shift 3s ease-in-out infinite;
-    }
-    
-    @keyframes gradient-shift {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-
-    .category-btn {
-      @apply text-gray-300 bg-transparent hover:bg-slate-700/50;
-    }
-    
-    .category-btn.active {
-      @apply bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg;
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
-    }
-    
-    .project-card {
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(148, 163, 184, 0.1);
-      transition: all 0.3s ease;
-    }
-    
-    .project-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(56, 189, 248, 0.1);
-      border-color: rgba(56, 189, 248, 0.3);
-    }
-
-    .featured-project {
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.7) 100%);
-      backdrop-filter: blur(15px);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-    }
-
-    .featured-project:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 40px rgba(56, 189, 248, 0.15);
-      border-color: rgba(56, 189, 248, 0.4);
-    }
-
-    .tag {
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      transition: all 0.2s ease;
-    }
-
-    .tag:hover {
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
-      border-color: rgba(56, 189, 248, 0.4);
-    }
-
-    .project-link {
-      transition: all 0.2s ease;
-    }
-
-    .project-link:hover {
-      transform: scale(1.1);
-      filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.5));
-    }
-
-    @keyframes fade-in-up {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .animate-fade-in {
-      animation: fade-in-up 0.6s ease-out;
-    }
-}
 /* ==========================================================================
-   Design system — tokens shared by the Projects / Experience / Leadership
-   pages. Single source of truth: no page may declare its own colour, font
-   or radius literals.
+   Design system — tokens shared by every page. Single source of truth: no
+   page may declare its own colour, font or radius literals.
+
+   Palette: warm near-black base, cream ink ramp, burnt-orange accent.
    ========================================================================== */
 
 :root {
@@ -393,15 +42,41 @@ body {
   --ink-5: #6F6C67;
   --ink-6: #4C4945;
 
+  /* Channels, for the `rgba()` tints these are mixed into. */
+  --ink-rgb: 239, 235, 228;
+  --surface-rgb: 18, 18, 20;
+
   /* Accent */
   --accent: #E8552F;
   --accent-hover: #FF7A55;
   --accent-rgb: 232, 85, 47;
 
+  /* Categorical trio — the only colours outside the accent and the ink ramp.
+     Terracotta is the accent itself, so the set includes the brand hue
+     rather than competing with it; ochre and teal are picked for greyscale
+     separation (L = 125 / 169 / 146) so the categories survive desaturation
+     and colour-blindness. All three clear 4.5:1 on `--bg`.
+
+     Named by slot, not by hue, so retinting one doesn't turn its name into
+     a lie — which is exactly what happened to the `--blue` / `--red` pair
+     these replaced. */
+  --cat-1: var(--accent);  /* terracotta #E8552F */
+  --cat-2: #E0A33C;        /* ochre */
+  --cat-3: #6E9BC4;        /* steel blue */
+
+  /* Channel for ochre's alpha tints (the metric underline). */
+  --cat-2-rgb: 224, 163, 60;
+
+  /* Physical-object paper (the polaroids). Shares the `--ink` value, but
+     kept separate because it stands in for photo stock rather than ink —
+     a future ink change shouldn't drag the polaroids with it. */
+  --paper: #EFEBE4;
+  --paper-ink: #201E1D;
+
   /* Rules */
-  --rule: rgba(239, 235, 228, .12);
-  --rule-soft: rgba(239, 235, 228, .09);
-  --rule-faint: rgba(239, 235, 228, .08);
+  --rule: rgba(var(--ink-rgb), .12);
+  --rule-soft: rgba(var(--ink-rgb), .09);
+  --rule-faint: rgba(var(--ink-rgb), .08);
 
   /* Radii */
   --radius: 4px;
@@ -417,10 +92,9 @@ body {
   --font-display: 'Dancing Script', cursive;
   --font-num: 'Instrument Serif', serif;
   --font-body: 'Space Grotesk', sans-serif;
-  --font-mono: 'Space Mono', ui-monospace, monospace;
-  --font-brico: 'Bricolage Grotesque', 'Space Grotesk', sans-serif;
 
-  /* Link ink (the redesigned pages override this with the orange accent). */
+  /* Link ink. Only reached outside `.design-page` — `DesignLayout` colours
+     every link inside it with the orange accent instead. */
   --link: #5B8CFF;
   --link-hover: #93B4FF;
 
@@ -447,6 +121,23 @@ body {
 
 :where(a:hover) {
   color: var(--link-hover);
+}
+
+/* --- Global Styles ------------------------------------------------------- */
+
+html {
+  scroll-behavior: smooth;
+  max-width: 100%;
+}
+
+body {
+  /* `clip` rather than `hidden` so that `position: sticky` descendants keep working */
+  overflow-x: clip;
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* --- Page shell ---------------------------------------------------------- */

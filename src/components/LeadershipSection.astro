@@ -176,7 +176,7 @@ const stats = entry.stats.map((stat) => ({ ...stat, ...parseStat(stat.num) }));
 
   .frame {
     overflow: hidden;
-    border: 1px solid rgba(239, 235, 228, .14);
+    border: 1px solid rgba(var(--ink-rgb), .14);
     border-radius: var(--radius-card);
     height: 420px;
     position: relative;

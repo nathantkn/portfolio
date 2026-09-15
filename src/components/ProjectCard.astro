@@ -115,12 +115,14 @@ const badge = project.badge || String(index + 1).padStart(2, '0');
 
   .card:hover,
   .card:focus-visible {
-    border-color: var(--accent);
+    border-color: var(--cat-2);
     top: -5px;
   }
 
+  /* Matches the hover border so keyboard focus and pointer hover read as the
+     same affordance. */
   .card:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--cat-2);
     outline-offset: 3px;
   }
 
@@ -159,7 +161,7 @@ const badge = project.badge || String(index + 1).padStart(2, '0');
   .scrim {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, var(--surface) 2%, rgba(18, 18, 20, .15) 60%);
+    background: linear-gradient(to top, var(--surface) 2%, rgba(var(--surface-rgb), .15) 60%);
   }
 
   .badge {
@@ -170,7 +172,7 @@ const badge = project.badge || String(index + 1).padStart(2, '0');
     font-size: 11px;
     letter-spacing: .1em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--cat-2);
     background: rgba(11, 11, 12, .7);
     backdrop-filter: blur(6px);
     padding: 5px 10px;
@@ -225,7 +227,7 @@ const badge = project.badge || String(index + 1).padStart(2, '0');
     font-family: var(--font-body);
     font-size: 10px;
     color: var(--ink-2);
-    background: rgba(239, 235, 228, .07);
+    background: rgba(var(--ink-rgb), .07);
     padding: 5px 9px;
     border-radius: var(--radius-chip);
   }

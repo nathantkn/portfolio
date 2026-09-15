@@ -258,7 +258,7 @@ const {
     height: 11px;
     border-radius: var(--radius-pill);
     background: var(--bg);
-    border: 1px solid rgba(239, 235, 228, .35);
+    border: 1px solid rgba(var(--ink-rgb), .35);
     transition: background .4s ease, border-color .4s ease, box-shadow .4s ease;
   }
 
@@ -306,7 +306,7 @@ const {
   .polaroid {
     display: inline-block;
     margin: 0;
-    background: #EFEBE4;
+    background: var(--paper);
     padding: 10px 10px 38px;
     box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
     transition: transform .4s cubic-bezier(.2, .8, .2, 1);
@@ -333,7 +333,7 @@ const {
     font-family: var(--font-display);
     font-size: 17px;
     line-height: 1.05;
-    color: #201E1D;
+    color: var(--paper-ink);
     text-align: left;
   }
 

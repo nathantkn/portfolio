@@ -1,6 +1,6 @@
 ---
 /**
- * The `02 / stack` centrepiece: a draggable word cloud.
+ * The `02 / skills` centrepiece: a draggable word cloud.
  *
  * Word colour comes from its category; word *size* comes from how many
  * projects in `PROJECTS` list it as a tag, so the cloud re-weights itself
@@ -12,7 +12,7 @@ import { PROJECTS } from '../data/portfolio';
 const CATEGORIES = [
   {
     id: 'languages',
-    color: '#C77DFF',
+    color: 'var(--cat-1)',
     skills: [
       'Python', 'C', 'C++', 'Java', 'JavaScript', 'TypeScript', 
       'SQL', 'Dart', 'Swift', 'Kotlin', 'C#', 'Go'
@@ -20,7 +20,7 @@ const CATEGORIES = [
   },
   {
     id: 'frameworks',
-    color: '#5B8CFF',
+    color: 'var(--cat-2)',
     skills: [
       'React', 'Node.js', 'Next.js', 'Astro', 'Vite', 'Spring', 'Flask',
       'Express', 'Flutter', 'Tailwind', 'TensorFlow.js', 'Jest', 'Maven', 'OpenCV'
@@ -28,7 +28,7 @@ const CATEGORIES = [
   },
   {
     id: 'technologies',
-    color: '#FF5470',
+    color: 'var(--cat-3)',
     skills: [
       'Linux', 'Nginx', 'RESTful APIs', 'JWT', 'OAuth', 'GoogleTest',
       'Raspberry Pi', 'MariaDB', 'SQLite', 'Firebase', 'PostgreSQL',
@@ -52,7 +52,7 @@ const words = CATEGORIES.flatMap((category) =>
 );
 
 const filters = [
-  { id: 'all', color: '#F5F3EF' },
+  { id: 'all', color: 'var(--ink)' },
   ...CATEGORIES.map((category) => ({ id: category.id, color: category.color })),
 ];
 ---
@@ -107,11 +107,13 @@ const filters = [
     gap: 10px 18px;
   }
 
+  /* The body face rather than the display one: these words go down to 13px,
+     and `PACK_FONT` in the script below has to match this declaration. */
   .word {
-    font-family: var(--font-brico);
-    font-weight: 800;
+    font-family: var(--font-body);
+    font-weight: 600;
     line-height: 1;
-    letter-spacing: -.03em;
+    letter-spacing: -.02em;
     white-space: nowrap;
     user-select: none;
     -webkit-user-select: none;
@@ -131,13 +133,13 @@ const filters = [
   }
 
   .word:hover {
-    color: #F5F3EF !important;
+    color: var(--ink) !important;
   }
 
   .word.is-dragging {
     z-index: 5;
     cursor: grabbing;
-    color: #F5F3EF !important;
+    color: var(--ink) !important;
   }
 
   .filters {
@@ -148,28 +150,29 @@ const filters = [
   }
 
   .pill {
-    font-family: var(--font-mono);
+    font-family: var(--font-body);
     font-size: 12px;
+    letter-spacing: .08em;
     line-height: 1;
     min-height: 44px;
     padding: 0 18px;
-    border-radius: 999px;
-    border: 1px solid rgba(245, 243, 239, .18);
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(var(--ink-rgb), .18);
     background: transparent;
-    color: #9A968E;
+    color: var(--ink-4);
     cursor: pointer;
     transition: color .2s ease, background .2s ease, border-color .2s ease;
   }
 
   .pill:hover {
-    border-color: var(--pill-color, #F5F3EF);
-    color: #F5F3EF;
+    border-color: var(--pill-color, var(--ink));
+    color: var(--ink);
   }
 
   .pill.is-active {
-    background: var(--pill-color, #F5F3EF);
-    border-color: var(--pill-color, #F5F3EF);
-    color: #0D0F14;
+    background: var(--pill-color, var(--ink));
+    border-color: var(--pill-color, var(--ink));
+    color: var(--bg);
   }
 </style>
 
@@ -186,6 +189,8 @@ const filters = [
   // Widest first: the cloud grows taller rather than denser as the column
   // narrows, which keeps the big words legible on phones.
   const STRETCHES = [1.9, 1.5, 1.2, 0.95, 0.72, 0.55, 0.4];
+  // Must track the `.word` rule above, or every measured box is the wrong size.
+  const PACK_FONT = (fs) => `600 ${fs}px "Space Grotesk", sans-serif`;
 
   pills.forEach((pill) => pill.style.setProperty('--pill-color', pill.dataset.color));
 
@@ -219,7 +224,7 @@ const filters = [
       .map((word) => {
         const t = (word.count - min) / span;
         const fs = Math.max(13, Math.round((17 + t * 47) * fscale));
-        measure.font = `800 ${fs}px "Bricolage Grotesque", sans-serif`;
+        measure.font = PACK_FONT(fs);
         return {
           word,
           fs,

@@ -62,29 +62,15 @@ export const PROJECTS: Project[] = [
     title: 'Dakmod',
     kind: 'work',
     dates: 'June 2025',
-    img: '',
+    img: '/projects/dakmod.jpg',
     website: 'http://dakmod.labs.fulcrumgt.com/',
     repo: '',
     tags: ['TypeScript', 'Swift', 'Python', 'OAuth'],
     badge: 'Fulcrum Labs',
     blurb:
-      'The safety layer between you and your media',
+      'The safety layer between you and your media.',
     desc:
       'An accessibility and safety layer for media content. Dakmod detects and remediates uncomfortable content in media, such as flashing lights, loud sounds, and triggering content in videos and movies.',
-  },
-  {
-    title: 'Haven',
-    kind: 'hackathon',
-    dates: 'April 2025',
-    img: '/projects/haven.png',
-    website: 'https://devpost.com/software/haven-kj3o4q',
-    repo: 'https://github.com/Ayush7970/wildhacks_2026',
-    tags: ['TypeScript', 'Next.js', 'Python', 'OAuth', 'TensorFlow.js'],
-    badge: '1st place, WildHacks 2026',
-    blurb:
-      'Wellness and productivity for neurodivergent people: sensory-aware scheduling, focus tools, and environment sensing.',
-    desc:
-      'A neurodivergent-focused wellness and productivity app. Haven helps people with sensory processing differences navigate daily life through smarter scheduling, focus tools, sensory-aware place ratings, and environment sensing. First place for WildHacks 2026.',
   },
   {
     title: 'SparkHacks 2026 Website',
@@ -111,6 +97,20 @@ export const PROJECTS: Project[] = [
     blurb: 'The dashboard for UIC’s student-run hackathon, SparkHacks 2026.',
     desc:
       'The user and admin dashboard used for SparkHacks 2026. Features include managing applications, scanning QR codes, changing permissions, and live analytics.',
+  },
+  {
+    title: 'Haven',
+    kind: 'hackathon',
+    dates: 'April 2025',
+    img: '/projects/haven.png',
+    website: 'https://devpost.com/software/haven-kj3o4q',
+    repo: 'https://github.com/Ayush7970/wildhacks_2026',
+    tags: ['TypeScript', 'Next.js', 'Python', 'OAuth', 'TensorFlow.js'],
+    badge: '1st place, WildHacks 2026',
+    blurb:
+      'Wellness and productivity for neurodivergent people: sensory-aware scheduling, focus tools, and environment sensing.',
+    desc:
+      'A neurodivergent-focused wellness and productivity app. Haven helps people with sensory processing differences navigate daily life through smarter scheduling, focus tools, sensory-aware place ratings, and environment sensing. First place for WildHacks 2026.',
   },
   {
     title: 'Mystery AI',
@@ -178,10 +178,10 @@ export const PROJECTS: Project[] = [
       'Allows parties to split dining and grocery bills, based on the number of people and the items they bought or shared.',
   },
   {
-    title: 'Music Ranker',
+    title: 'CycleBoard',
     kind: 'personal',
     dates: 'May 2025 - February 2026',
-    img: '/projects/music_ranker.png',
+    img: '/projects/cycleboard.png',
     website: 'https://music-rank-193652486981.us-central1.run.app/',
     repo: 'https://github.com/nathantkn/music-rank',
     tags: ['React', 'Node.js', 'Express', 'PostgreSQL'],
@@ -199,7 +199,7 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/nathantkn/tariffarm',
     tags: ['Python', 'React', 'Next.js'],
     badge: '3rd place, WildHacks 2025',
-    blurb: 'Calculates and visualizes the true landed cost of importing commodities.',
+    blurb: 'Calculates and visualizes the true cost of importing commodities.',
     desc:
       'Allows users to calculate and visualize the full cost of importing commodities into the US. Third place winner for WildHacks 2025.',
   },

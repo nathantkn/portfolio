@@ -16,9 +16,11 @@ const segments = parseRich(text);
 {segments.map((s) => (s.bold ? <strong class="rt-strong">{s.text}</strong> : <Fragment>{s.text}</Fragment>))}
 
 <style>
+  /* The emphasised runs are all metrics, so the underline carries the ochre
+     that marks figures elsewhere on the site rather than the orange accent. */
   .rt-strong {
     color: var(--ink);
     font-weight: 600;
-    border-bottom: 1px solid rgba(var(--accent-rgb), .6);
+    border-bottom: 1px solid rgba(var(--cat-2-rgb), .6);
   }
 </style>
