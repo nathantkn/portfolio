@@ -44,6 +44,8 @@ export interface Experience {
 export interface LeadershipStat {
   num: string;
   subtext: string;
+  /** Renders the figure in the accent; meant for one stat per org. */
+  accent?: boolean;
 }
 
 export interface Leadership {
@@ -108,7 +110,7 @@ export const PROJECTS: Project[] = [
     tags: ['TypeScript', 'Next.js', 'Python', 'OAuth', 'TensorFlow.js'],
     badge: '1st place, WildHacks 2026',
     blurb:
-      'Wellness and productivity for neurodivergent people: sensory-aware scheduling, focus tools, and environment sensing.',
+      'Rethink the world for every mind!',
     desc:
       'A neurodivergent-focused wellness and productivity app. Haven helps people with sensory processing differences navigate daily life through smarter scheduling, focus tools, sensory-aware place ratings, and environment sensing. First place for WildHacks 2026.',
   },
@@ -139,32 +141,6 @@ export const PROJECTS: Project[] = [
       'An autonomous startup builder that analyzes trends from around the world, extrapolates problem statements, and autonomously builds software products to address those problems. It also simultaneously handles the business development and customer outreach, all from a single platform.',
   },
   {
-    title: 'Schedly',
-    kind: 'personal',
-    dates: 'October 2025 - December 2025',
-    img: '/projects/schedly.png',
-    website: 'https://schedly-gtxg.onrender.com/',
-    repo: 'https://github.com/mqbal/CS484_Final',
-    tags: ['Next.js', 'React', 'TypeScript', 'OAuth'],
-    badge: '',
-    blurb: 'Drop in a course syllabus, and never miss a deadline again.',
-    desc:
-      'Upload your course syllabi and let AI extract assignments and exam dates. Sync everything to Google Calendar, and get every deadline synced to your calendar.',
-  },
-  {
-    title: 'Restockd',
-    kind: 'personal',
-    dates: 'September 2025 - December 2025',
-    img: '/projects/restockd.png',
-    website: 'https://restockd-ten.vercel.app/',
-    repo: 'https://github.com/TheRoadSurgeon/CS351-GroupProject',
-    tags: ['React', 'Flask', 'PostgreSQL'],
-    badge: '',
-    blurb: 'Real-time matchmaking between food donors and food banks.',
-    desc:
-      'Streamlines coordination between food donors and food banks in real-time. Enables food banks to post donation needs, donors to discover nearby opportunities, and both parties to schedule seamless pickups and drop-offs.',
-  },
-  {
     title: 'Dynamic Bill Splitter',
     kind: 'personal',
     dates: 'October 2025',
@@ -189,6 +165,32 @@ export const PROJECTS: Project[] = [
     blurb: 'Your very own Billboard Hot 100.',
     desc:
       'Allows users to rank their favorite music tracks and keep a record of their favorite artists.',
+  },
+    {
+    title: 'Schedly',
+    kind: 'personal',
+    dates: 'October 2025 - December 2025',
+    img: '/projects/schedly.png',
+    website: 'https://schedly-gtxg.onrender.com/',
+    repo: 'https://github.com/mqbal/CS484_Final',
+    tags: ['Next.js', 'React', 'TypeScript', 'OAuth'],
+    badge: '',
+    blurb: 'Drop in a course syllabus, and never miss a deadline again.',
+    desc:
+      'Upload your course syllabi and let AI extract assignments and exam dates. Sync everything to Google Calendar, and get every deadline synced to your calendar.',
+  },
+  {
+    title: 'Restockd',
+    kind: 'personal',
+    dates: 'September 2025 - December 2025',
+    img: '/projects/restockd.png',
+    website: 'https://restockd-ten.vercel.app/',
+    repo: 'https://github.com/TheRoadSurgeon/CS351-GroupProject',
+    tags: ['React', 'Flask', 'PostgreSQL'],
+    badge: '',
+    blurb: 'Real-time matchmaking between food donors and food banks.',
+    desc:
+      'Streamlines coordination between food donors and food banks in real-time. Enables food banks to post donation needs, donors to discover nearby opportunities, and both parties to schedule seamless pickups and drop-offs.',
   },
   {
     title: 'TARIFFARM',
@@ -316,7 +318,7 @@ export const LEADERSHIP: Leadership[] = [
       'The experience has been nothing short of amazing. I’ve learned so much about project management and leadership, and I’ve had the opportunity to work with the most talented team.',
     ],
     stats: [
-      { num: '700+', subtext: 'dashboard users' },
+      { num: '700+', subtext: 'dashboard users',  accent: true },
       { num: '300+', subtext: 'accepted hackers' },
       { num: '100%', subtext: 'website uptime' },
     ],
@@ -334,7 +336,7 @@ export const LEADERSHIP: Leadership[] = [
     ],
     stats: [
       { num: '400+', subtext: 'hackers' },
-      { num: '93%', subtext: 'retention rate' },
+      { num: '93%', subtext: 'retention rate',  accent: true },
       { num: '$30,000+', subtext: 'sponsorship funding' },
     ],
   },
@@ -352,7 +354,7 @@ export const LEADERSHIP: Leadership[] = [
     stats: [
       { num: '100+', subtext: 'average participants in major events' },
       { num: '5+', subtext: 'total events hosted' },
-      { num: '$2,000+', subtext: 'fundraised' },
+      { num: '$2,000+', subtext: 'fundraised',  accent: true },
     ],
   },
 ];

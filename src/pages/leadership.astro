@@ -2,8 +2,6 @@
 import DesignLayout from '../layouts/DesignLayout.astro';
 import LeadershipSection from '../components/LeadershipSection.astro';
 import { LEADERSHIP } from '../data/portfolio';
-
-const meta = ['The 3 teams I helped lead', 'throughout my time at UIC'];
 ---
 
 <DesignLayout
@@ -14,9 +12,9 @@ const meta = ['The 3 teams I helped lead', 'throughout my time at UIC'];
   <header class="shell hero">
     <div class="hero-row">
       <h1 class="d-h1 hero-title" data-hero>My<br /><em>leadership roles</em></h1>
-      <div class="meta">
-        {meta.map((line) => <span>{line}</span>)}
-      </div>
+    </div>
+    <div class="meta">
+      <span>The 3 teams I helped lead throughout my time at UIC</span>
     </div>
   </header>
 
@@ -49,7 +47,7 @@ const meta = ['The 3 teams I helped lead', 'throughout my time at UIC'];
   }
 
   .meta {
-    padding-bottom: 16px;
+    padding-top: 32px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -57,7 +55,7 @@ const meta = ['The 3 teams I helped lead', 'throughout my time at UIC'];
     font-size: 12px;
     letter-spacing: .16em;
     text-transform: uppercase;
-    color: var(--ink-5);
+    color: var(--ink-3);
   }
 
   .orgs {

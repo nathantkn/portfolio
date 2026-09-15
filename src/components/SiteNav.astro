@@ -21,7 +21,19 @@ const links = [
 
 <nav class="site-nav">
   <a class="wordmark" href="/">Nathan Trinh</a>
-  <div class="links">
+
+  <!-- Only rendered (visible) under the mobile breakpoint; toggles `.links`. -->
+  <button
+    class="nav-toggle"
+    type="button"
+    aria-label="Menu"
+    aria-expanded="false"
+    aria-controls="site-nav-links"
+  >
+    <span class="bars" aria-hidden="true"></span>
+  </button>
+
+  <div class="links" id="site-nav-links">
     {
       links.map((link) => (
         <a
@@ -97,15 +109,143 @@ const links = [
     background: var(--ink);
   }
 
+  /* Hamburger — hidden above the mobile breakpoint. Borrows the pill's
+     backdrop so it reads as part of the same floating surface. */
+  .nav-toggle {
+    display: none;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    background: rgba(11, 11, 12, .55);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  /* Three bars: the middle one is the element, the outer two are its
+     pseudo-elements, so the open state can collapse them into an X. */
+  .bars,
+  .bars::before,
+  .bars::after {
+    display: block;
+    width: 17px;
+    height: 1.5px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform .25s var(--ease-out-soft), opacity .2s ease;
+  }
+
+  .bars {
+    position: relative;
+  }
+
+  .bars::before,
+  .bars::after {
+    content: '';
+    position: absolute;
+    left: 0;
+  }
+
+  .bars::before { top: -5.5px; }
+  .bars::after { top: 5.5px; }
+
+  .site-nav.is-open .bars {
+    transform: rotate(45deg);
+  }
+
+  .site-nav.is-open .bars::before {
+    transform: translateY(5.5px) rotate(-90deg);
+  }
+
+  .site-nav.is-open .bars::after {
+    opacity: 0;
+  }
+
   @media (max-width: 640px) {
     .site-nav {
       padding: 16px 20px;
-      flex-wrap: wrap;
+    }
+
+    .nav-toggle {
+      display: flex;
+    }
+
+    /* The pill becomes a dropdown panel anchored under the nav bar. */
+    .links {
+      position: absolute;
+      top: calc(100% - 6px);
+      right: 20px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 2px;
+      padding: 6px;
+      min-width: 168px;
+      border-radius: 16px;
+      opacity: 0;
+      transform: translateY(-6px);
+      /* `visibility` keeps the closed panel's links out of the tab order. */
+      visibility: hidden;
+      transition: opacity .2s ease, transform .25s var(--ease-out-soft),
+        visibility .2s;
+    }
+
+    .site-nav.is-open .links {
+      opacity: 1;
+      transform: none;
+      visibility: visible;
     }
 
     .nav-link {
-      font-size: 11px;
-      padding: 6px 10px;
+      font-size: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      text-align: left;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .links,
+    .bars,
+    .bars::before,
+    .bars::after {
+      transition: none;
     }
   }
 </style>
+
+<script>
+  const nav = document.querySelector<HTMLElement>('.site-nav');
+  const toggle = nav?.querySelector<HTMLButtonElement>('.nav-toggle');
+
+  if (nav && toggle) {
+    const setOpen = (open: boolean) => {
+      nav.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+    };
+
+    toggle.addEventListener('click', () => {
+      setOpen(!nav.classList.contains('is-open'));
+    });
+
+    // Tapping anywhere off the nav dismisses it.
+    document.addEventListener('click', (event) => {
+      if (!nav.contains(event.target as Node)) setOpen(false);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !nav.classList.contains('is-open')) return;
+      setOpen(false);
+      toggle.focus();
+    });
+
+    // Resizing past the breakpoint hands layout back to the desktop pill.
+    const wide = window.matchMedia('(min-width: 641px)');
+    wide.addEventListener('change', (event) => {
+      if (event.matches) setOpen(false);
+    });
+  }
+</script>

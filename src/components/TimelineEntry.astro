@@ -145,8 +145,10 @@ const {
     transition: border-color .35s ease, transform .35s ease;
   }
 
+  /* Gold (ochre) rather than the site accent: it's the hue the home page
+     already assigns to Experience. The Gantt map above stays on the accent. */
   .card:hover {
-    border-color: rgba(var(--accent-rgb), .55);
+    border-color: rgba(var(--cat-2-rgb), .55);
     transform: translateY(-3px);
   }
 
@@ -171,8 +173,8 @@ const {
     font-size: 10px;
     letter-spacing: .18em;
     text-transform: uppercase;
-    color: var(--accent);
-    border: 1px solid rgba(var(--accent-rgb), .4);
+    color: var(--cat-2);
+    border: 1px solid rgba(var(--cat-2-rgb), .4);
     border-radius: var(--radius-pill);
     padding: 4px 10px;
   }
@@ -181,7 +183,7 @@ const {
     width: 5px;
     height: 5px;
     border-radius: var(--radius-pill);
-    background: var(--accent);
+    background: var(--cat-2);
     animation: d-blip 1.8s ease-in-out infinite;
   }
 
@@ -263,9 +265,9 @@ const {
   }
 
   .dot.is-lit {
-    background: var(--accent);
-    border-color: var(--accent);
-    box-shadow: 0 0 0 5px rgba(var(--accent-rgb), .14);
+    background: var(--cat-2);
+    border-color: var(--cat-2);
+    box-shadow: 0 0 0 5px rgba(var(--cat-2-rgb), .14);
   }
 
   /* --- Date block --------------------------------------------------------- */

@@ -66,7 +66,7 @@ const stats = entry.stats.map((stat) => ({ ...stat, ...parseStat(stat.num) }));
         stats.map((stat) => (
           <div class="stat-cell">
             <div
-              class="num figure"
+              class:list={['num', 'figure', { 'is-accent': stat.accent }]}
               data-count-target={stat.target ?? undefined}
               data-count-prefix={stat.prefix}
               data-count-suffix={stat.suffix}
@@ -235,6 +235,11 @@ const stats = entry.stats.map((stat) => ({ ...stat, ...parseStat(stat.num) }));
     font-size: clamp(40px, 4.6vw, 68px);
     letter-spacing: -.01em;
     color: var(--ink);
+  }
+
+  /* Opt-in per stat, so each org highlights only its headline number. */
+  .figure.is-accent {
+    color: var(--accent);
   }
 
   .stat-caption {

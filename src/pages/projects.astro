@@ -4,6 +4,7 @@ import ProjectCard from '../components/ProjectCard.astro';
 import ProjectDetail from '../components/ProjectDetail.astro';
 import { PROJECTS, PROJECT_KINDS } from '../data/portfolio';
 import { waterfall, uniqueTags } from '../lib/waterfall';
+import { parseStat } from '../lib/stats';
 
 // The unfiltered cascade is resolved at build time so the first paint already
 // has its final geometry — the client only re-flows when a filter changes.
@@ -23,11 +24,12 @@ const filters = [
 const marqueeRun = uniqueTags(PROJECTS);
 const marquee = [...marqueeRun, ...marqueeRun];
 
+// `parseStat` splits the affixes off so the count-up can animate the number.
 const stats = [
-  { figure: '11', label: 'shipped', accent: false },
+  { figure: '12', label: 'projects', accent: false },
   { figure: '3', label: 'hackathon wins', accent: false },
-  { figure: '700+', label: 'real users', accent: true },
-];
+  { figure: '1,000+', label: 'real users', accent: true },
+].map((stat) => ({ ...stat, ...parseStat(stat.figure) }));
 ---
 
 <DesignLayout
@@ -38,17 +40,24 @@ const stats = [
   <header class="shell hero">
     <div class="hero-row">
       <h1 class="d-h1 hero-title" data-hero>My<br /><span class="dot">shipped projects</span></h1>
-      <div class="stats">
+    </div>
+    <div class="stats" data-reveal>
         {
           stats.map((stat) => (
             <div class="stat">
-              <div class:list={['num', 'figure', { 'is-accent': stat.accent }]}>{stat.figure}</div>
+              <div
+                class:list={['num', 'figure', { 'is-accent': stat.accent }]}
+                data-count-target={stat.target ?? undefined}
+                data-count-prefix={stat.prefix}
+                data-count-suffix={stat.suffix}
+              >
+                {stat.figure}
+              </div>
               <div class="stat-label">{stat.label}</div>
             </div>
           ))
         }
       </div>
-    </div>
   </header>
 
   <div class="shell filters">
@@ -111,6 +120,7 @@ const stats = [
     display: flex;
     gap: 44px;
     padding-bottom: 14px;
+    padding-top: 28px;
     flex-wrap: wrap;
   }
 
@@ -257,7 +267,7 @@ const stats = [
 </style>
 
 <script>
-  import { onScrollFrame, makeRevealSweep, parallaxHero } from '../lib/scroll';
+  import { onScrollFrame, makeRevealSweep, parallaxHero, countUp } from '../lib/scroll';
   import { waterfall } from '../lib/waterfall';
 
   const cards = [...document.querySelectorAll<HTMLElement>('[data-card]')];
@@ -267,7 +277,12 @@ const stats = [
   /* --- Scroll: hero parallax + reveal sweep ------------------------------ */
 
   const heroFrame = parallaxHero(document.querySelector<HTMLElement>('[data-hero]'), -0.13);
-  const sweep = makeRevealSweep(0.94);
+  // Hero figures count up once, when their row reveals.
+  const sweep = makeRevealSweep(0.94, (section) => {
+    for (const figure of section.querySelectorAll<HTMLElement>('[data-count-target]')) {
+      countUp(figure);
+    }
+  });
 
   onScrollFrame(() => {
     heroFrame();
