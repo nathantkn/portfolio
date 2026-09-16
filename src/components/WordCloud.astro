@@ -62,14 +62,21 @@ const filters = [
        these same spans once it can measure them, so no-JS still reads fine. -->
   <div class="cloud is-static" id="cloud">
     {
-      words.map((word) => (
+      words.map((word, i) => (
         <span
           class="word"
           data-word={word.name}
           data-cat={word.cat}
           style={`color: ${word.color}`}
         >
-          {word.name}
+          {/* Inner span carries the idle drift: the outer one is driven by the
+              drag/settle loop, and two owners of `transform` would fight. */}
+          <span
+            class="word-inner"
+            style={`--drift-dur: ${(5.5 + (i % 7) * 0.8).toFixed(1)}s; --drift-delay: -${(i * 0.83).toFixed(2)}s; --drift-dir: ${i % 2 ? -1 : 1}`}
+          >
+            {word.name}
+          </span>
         </span>
       ))
     }
@@ -140,6 +147,39 @@ const filters = [
     z-index: 5;
     cursor: grabbing;
     color: var(--ink) !important;
+  }
+
+  /* A slow, barely-there bob so the cloud reads as grabbable at rest. Each word
+     gets its own duration/phase/direction from the inline vars, otherwise the
+     whole cloud breathes in unison and looks like a page wobble. */
+  .word-inner {
+    display: inline-block;
+    animation: drift var(--drift-dur, 7s) ease-in-out var(--drift-delay, 0s) infinite;
+  }
+
+  /* Pre-hydration the words are in flow, where a drift would just look broken. */
+  .cloud.is-static .word-inner {
+    animation: none;
+  }
+
+  /* Freeze in place while held or hovered — no fighting the cursor, and a word
+     you're reading stays still. */
+  .word:hover .word-inner,
+  .word.is-dragging .word-inner {
+    animation-play-state: paused;
+  }
+
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(calc(var(--drift-dir) * 2.5px), -2px) rotate(calc(var(--drift-dir) * 0.6deg)); }
+    50% { transform: translate(0, calc(var(--drift-dir) * 2.5px)) rotate(0deg); }
+    75% { transform: translate(calc(var(--drift-dir) * -2.5px), 2px) rotate(calc(var(--drift-dir) * -0.6deg)); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .word-inner {
+      animation: none;
+    }
   }
 
   .filters {
