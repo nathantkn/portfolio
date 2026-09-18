@@ -14,6 +14,8 @@ interface Props {
   logo: string;
   /** Polaroid photo under the date block; empty string renders nothing. */
   photo: string;
+  /** Upright frame for a taller-than-wide photo; landscape otherwise. */
+  photoPortrait?: boolean;
   date: string;
   bigYear: string;
   duration: string;
@@ -30,6 +32,7 @@ const {
   company,
   logo,
   photo,
+  photoPortrait = false,
   date,
   bigYear,
   duration,
@@ -82,14 +85,23 @@ const {
     <span class="dot" data-dot></span>
   </div>
 
-  <div class:list={['date-col', side === 'left' ? 'from-right' : 'from-left']} data-reveal>
-    <div class="num big-year">{bigYear}</div>
-    <div class="date-range">{date}</div>
-    <div class="duration">{duration}</div>
+  <div
+    class:list={[
+      'date-col',
+      side === 'left' ? 'from-right' : 'from-left',
+      photo && photoPortrait && 'has-portrait',
+    ]}
+    data-reveal
+  >
+    <div class="date-text">
+      <div class="num big-year">{bigYear}</div>
+      <div class="date-range">{date}</div>
+      <div class="duration">{duration}</div>
+    </div>
 
     {
       photo && (
-        <figure class="photo">
+        <figure class:list={['photo', photoPortrait && 'is-portrait']}>
           <img src={photo} alt={company} loading="lazy" />
           <div class="photo-scrim" />
           <figcaption>
@@ -317,6 +329,33 @@ const {
     border-color: rgba(var(--cat-2-rgb), .55);
   }
 
+  /* Upright shot: rather than a tall block under the date, it sits alongside
+     it at the date block's own height, on the outer side of the spine so the
+     text stays nearest the timeline. */
+  .date-col.has-portrait {
+    display: flex;
+    align-items: flex-start;
+    gap: 22px;
+  }
+
+  .side-right .date-col.has-portrait {
+    flex-direction: row-reverse;
+  }
+
+  .has-portrait .date-text {
+    flex: 1 1 auto;
+  }
+
+  .photo.is-portrait {
+    flex: none;
+    /* The 300px it had when it sat under the date, kept from crowding the
+       text out on narrower columns. */
+    width: min(300px, 55%);
+    height: auto;
+    aspect-ratio: 3 / 4;
+    margin: 4px 0 0;
+  }
+
   .photo img {
     display: block;
     width: 100%;
@@ -392,6 +431,12 @@ const {
 
     .card {
       padding: 24px 22px 26px;
+    }
+
+    /* Stacked, every date block reads left-to-right, so the mirrored entries
+       drop their reversed photo placement too. */
+    .side-right .date-col.has-portrait {
+      flex-direction: row;
     }
   }
 

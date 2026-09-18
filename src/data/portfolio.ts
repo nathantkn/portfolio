@@ -38,6 +38,8 @@ export interface Experience {
   logo: string;
   /** Polaroid photo shown under the date block; empty string renders nothing. */
   photo: string;
+  /** Set when the photo is taller than it is wide, so the frame turns upright. */
+  photoPortrait?: boolean;
   bullets: string[];
 }
 
@@ -226,7 +228,7 @@ export const EXPERIENCE: Experience[] = [
     date: 'June 2026 - Present',
     role: 'Software Engineer Associate',
     company: 'Fulcrum GT',
-    logo: '',
+    logo: 'logos/fulcrum.png',
     photo: '/dakmod-team.png',
     bullets: [
       'Built a sensory-safe product from scratch through a structured validation process, leading a cross-functional team of 6 to deliver <strong>10+</strong> features, converting roadmaps in Jira into measurable PRDs, lifting efficiency and adoption by <strong>25%</strong>.',
@@ -238,8 +240,8 @@ export const EXPERIENCE: Experience[] = [
     date: 'July 2025 - April 2026',
     role: 'Web Development Team Lead',
     company: 'SparkHacks',
-    logo: '',
-    photo: '',
+    logo: 'logos/sparkhacks26.svg',
+    photo: '/sparkhacks-exp.jpeg',
     bullets: [
       'Lead design and full-stack development of SparkHacks 2026’s main website, providing event information and registration access for <strong>400+</strong> participants, sponsors, mentors, and organizers.',
       'Enhance an admin dashboard backed by Firestore to aggregate, search, and filter <strong>500+</strong> records, with live analytics displaying acceptance rates, demographic breakdowns, and check-in progress.',
@@ -250,7 +252,7 @@ export const EXPERIENCE: Experience[] = [
     date: 'May 2025 - May 2026',
     role: 'Research Assistant',
     company: 'UIC ELiCIT Lab',
-    logo: '',
+    logo: 'logos/uic.svg',
     photo: '',
     bullets: [
       'Design <strong>60+</strong> low-fidelity wireframes screens to lead development of an interactive AI literacy educational app, teaching children aged 8-12 privacy concepts through puzzle-solving mechanics.',
@@ -261,7 +263,7 @@ export const EXPERIENCE: Experience[] = [
     date: 'January 2025 - May 2026',
     role: 'Undergraduate Teaching Assistant',
     company: 'UIC College of Engineering',
-    logo: '',
+    logo: 'logos/uic.svg',
     photo: '',
     bullets: [
       'Mentor <strong>400+</strong> students in C++ data structures and algorithmic problem-solving, offering course material and project support during lecture assistance and weekly in-person office hours.',
@@ -273,8 +275,9 @@ export const EXPERIENCE: Experience[] = [
     date: 'June 2024 - Aug 2024',
     role: 'Software Developer Intern',
     company: 'Viettel Digital',
-    logo: '',
-    photo: '',
+    logo: 'logos/viettel.webp',
+    photo: '/viettel.jpeg',
+    photoPortrait: true,
     bullets: [
       'Developed RESTful APIs for user interaction in PHP, Spring and Yii for an integrated Fintech social network system, increasing engagement and connectivity for over <strong>24 million users</strong>.',
       'Implemented JWT and OAuth 2.0 for secure, role-based API authentication and authorization across users, merchants, and admins, enhancing security and system performance.',
@@ -285,7 +288,7 @@ export const EXPERIENCE: Experience[] = [
     date: 'January 2024 - May 2025',
     role: 'CS Tutor',
     company: 'UIC Engineering Learning Center',
-    logo: '',
+    logo: 'logos/uic.svg',
     photo: '',
     bullets: [
       'Provide academic support and peer guidance availability to <strong>1500+</strong> students for multiple core Computer Science courses.',
@@ -296,7 +299,7 @@ export const EXPERIENCE: Experience[] = [
     date: 'July 2023 - Aug 2023',
     role: 'Software Developer Intern',
     company: 'VISSOFT',
-    logo: '',
+    logo: 'logos/vissoft.png',
     photo: '',
     bullets: [
       'Adapted the Bloom Filter algorithm for fast data retrieval, reducing lookup time and cutting memory usage by <strong>80%</strong> in a Java-based library management system with a MySQL backend.',
@@ -310,7 +313,7 @@ export const LEADERSHIP: Leadership[] = [
     role: 'Web Development Team Lead',
     organization: 'SparkHacks 2026',
     date: 'July 2025 - February 2026',
-    logo: '/sparkhacks26.svg',
+    logo: '/logos/sparkhacks26.svg',
     groupImage: '/sparkhacks_team26.jpg',
     imageCaption: 'The SparkHacks 2026 team!',
     description: [
@@ -327,7 +330,7 @@ export const LEADERSHIP: Leadership[] = [
     role: 'Logistics Organizer',
     organization: 'SparkHacks 2025',
     date: 'August 2024 - February 2025',
-    logo: '/sparkhacks25.svg',
+    logo: '/logos/sparkhacks25.svg',
     groupImage: '/sparkhacks_team25.jpg',
     imageCaption: 'The SparkHacks 2025 dream team :)',
     description: [
@@ -344,7 +347,7 @@ export const LEADERSHIP: Leadership[] = [
     role: 'Event Organizer',
     organization: 'Vietnamese International Student Association (VISA) at UIC',
     date: 'January 2025 - July 2025',
-    logo: '/visa.png',
+    logo: '/logos/visa.png',
     groupImage: '/visa_tet.JPG',
     imageCaption: 'The VISA team, celebrating Once Upon A Tết 2025',
     description: [
