@@ -107,7 +107,7 @@ export const PROJECTS: Project[] = [
     img: '/projects/haven.png',
     website: 'https://devpost.com/software/haven-kj3o4q',
     repo: 'https://github.com/Ayush7970/wildhacks_2026',
-    tags: ['TypeScript', 'Next.js', 'Python', 'OAuth', 'TensorFlow.js'],
+    tags: ['TypeScript', 'Next.js', 'Python', 'TensorFlow.js', 'OpenCV'],
     badge: '1st place, WildHacks 2026',
     blurb:
       'Rethink the world for every mind!',
@@ -121,7 +121,7 @@ export const PROJECTS: Project[] = [
     img: '/projects/mystery_ai.png',
     website: 'https://ai-privacy-literacy.vercel.app/',
     repo: 'https://github.com/nsoniuic/AI-Privacy-Literacy-Fall-2025',
-    tags: ['React', 'Node.js', 'JavaScript'],
+    tags: ['React', 'Node.js', 'JavaScript', 'ElevenLabs'],
     badge: 'Research',
     blurb: 'HCI research on how children reason about AI and privacy.',
     desc:
@@ -227,7 +227,7 @@ export const EXPERIENCE: Experience[] = [
     role: 'Software Engineer Associate',
     company: 'Fulcrum GT',
     logo: '',
-    photo: '',
+    photo: '/dakmod-team.png',
     bullets: [
       'Built a sensory-safe product from scratch through a structured validation process, leading a cross-functional team of 6 to deliver <strong>10+</strong> features, converting roadmaps in Jira into measurable PRDs, lifting efficiency and adoption by <strong>25%</strong>.',
       'Directed user research and weekly beta testing sessions to stress-test detection and remediation accuracy, translating findings into <strong>5+</strong> prioritized product requirements and validating product-market fit with neurodivergent end users.',

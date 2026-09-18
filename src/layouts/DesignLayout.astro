@@ -37,6 +37,27 @@ const { title, description, active, flush = false, footer = true, bodyClass } = 
     <SiteNav active={active} />
     <slot />
     {footer && <SiteFooter />}
+
+    <!--
+      The home hero plays an intro on arrival but not when you hop back to it
+      from another page. Rather than infer that from the referrer or the
+      navigation type — both of which are unreliable this early in the
+      document's life — every same-origin link click leaves a note here. The
+      home page reads the note and clears it, so a plain refresh (no click
+      involved) still counts as an arrival.
+    -->
+    <script is:inline>
+      document.addEventListener('click', (event) => {
+        const link = event.target.closest?.('a[href]');
+        if (!link || link.target === '_blank') return;
+        if (new URL(link.href, location.href).origin !== location.origin) return;
+        try {
+          sessionStorage.setItem('internalNav', '1');
+        } catch {
+          /* Privacy mode — the home page just replays its intro. */
+        }
+      });
+    </script>
   </body>
 </html>
 

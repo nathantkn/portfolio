@@ -10,8 +10,8 @@ import heroBg from '../assets/new-bg.gif';
 // `accent` names one of the `--cat-*` design tokens, not a literal.
 const photos = [
   { span: 4, img: '/webdev_team.jpg', caption: 'Web Dev Team, SparkHacks 2026', accent: 'var(--cat-1)' },
-  { span: 5, img: '/wildhacks2025.jpg', caption: 'First win @ WildHacks 2025', accent: 'var(--cat-2)' },
-  { span: 3, img: '/wildhacks2026.jpg', caption: 'First place @ WildHacks 2026', accent: 'var(--cat-3)' },
+  { span: 5, img: '/wildhacks2025.jpg', caption: 'First win, WildHacks 2025', accent: 'var(--cat-2)' },
+  { span: 3, img: '/fulcrum-headshot.jpeg', caption: 'Headshot, Fulcrum Labs 2026', accent: 'var(--cat-3)' },
 ];
 
 const rows = [
@@ -33,6 +33,41 @@ const rows = [
   flush
   bodyClass="home"
 >
+  <!--
+    The hero's staggered intro is an arrival flourish, not something to sit
+    through on every nav click. The note in `sessionStorage` is written by the
+    click handler in DesignLayout and is only ever present when the previous
+    page of this site sent us here; reading it also clears it, so a refresh
+    (nobody clicked anything) reads nothing and counts as an arrival.
+
+    This runs inline, during parse and before the hero exists, so the class is
+    on `<html>` by the time the animation would start — a deferred module
+    script would let it flash. Opting in (the animation is off by default)
+    also means no-JS visitors just see the hero.
+  -->
+  <script is:inline>
+    (() => {
+      // Storage access throws outright in some privacy modes. A visitor who
+      // can't be tracked between pages should still get the intro, so a
+      // failure here falls through to playing it.
+      let internal = false;
+      try {
+        internal = sessionStorage.getItem('internalNav') === '1';
+        sessionStorage.removeItem('internalNav');
+      } catch {
+        /* Privacy mode — treat it as an arrival. */
+      }
+
+      if (internal) return;
+
+      document.documentElement.classList.add('play-hero-intro');
+      // A refresh normally restores the old scroll position, which would run
+      // the intro off-screen while the reader sits halfway down the page. If
+      // we're playing it, start where it can be seen.
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    })();
+  </script>
+
   <main class="home-main">
     <!-- 1. Hero -->
     <section class="hero">
@@ -161,6 +196,30 @@ const rows = [
   .design-page.home .site-footer {
     margin-top: 110px;
   }
+
+  /* Over the hero the wordmark would just repeat the giant name below it, so
+     it stays out of the way until the hero has scrolled past. `visibility`
+     also keeps it out of the tab order while it's invisible. */
+  .design-page.home .wordmark {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity .45s ease, transform .45s var(--ease-out-soft),
+      visibility .45s;
+  }
+
+  .design-page.home.is-past-hero .wordmark {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .design-page.home .wordmark {
+      transform: none;
+      transition: opacity .45s ease, visibility .45s;
+    }
+  }
 </style>
 
 <style>
@@ -264,6 +323,28 @@ const rows = [
     margin: 0 auto;
     text-align: center;
     will-change: transform, opacity;
+  }
+
+  /* The hero introduces itself one line at a time. `backwards` holds the
+     from-state through the delay so nothing flashes on screen before its
+     turn. Gated on the class the inline script sets, so the stagger plays on
+     arrival but not when the nav brings you back here. */
+  :global(html.play-hero-intro) .hero-name,
+  :global(html.play-hero-intro) .hero-sub,
+  :global(html.play-hero-intro) .hero-cta {
+    animation: hero-in 2s var(--ease-out-soft) backwards;
+  }
+
+  /* The delays have to live on the gated selector too. As bare `.hero-name`
+     rules they lost to the shorthand above, which resets `animation-delay` to
+     zero and outranks them — every line then faded in at once. */
+  :global(html.play-hero-intro) .hero-name { animation-delay: 0.8s; }
+  :global(html.play-hero-intro) .hero-sub { animation-delay: 2s; }
+  :global(html.play-hero-intro) .hero-cta { animation-delay: 3.5s; }
+
+  @keyframes hero-in {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: none; }
   }
 
   .hero-name {
@@ -563,6 +644,18 @@ const rows = [
       animation: none;
       opacity: .8;
     }
+
+    /* Keep the staggered entrance, but as a plain fade with no travel. */
+    .hero-name,
+    .hero-sub,
+    .hero-cta {
+      animation-name: hero-in-fade;
+    }
+
+    @keyframes hero-in-fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
   }
 </style>
 
@@ -587,6 +680,10 @@ const rows = [
     if (heroInner) {
       heroInner.style.opacity = String(Math.max(0, 1 - y / (window.innerHeight * 0.8)));
     }
+
+    // The wordmark takes over once the hero name has faded out, so the name
+    // only ever reads in one place at a time.
+    document.body.classList.toggle('is-past-hero', y > window.innerHeight * 0.75);
 
     reveal();
   });
