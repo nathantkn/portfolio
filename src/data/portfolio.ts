@@ -226,7 +226,7 @@ export const PROJECTS: Project[] = [
 export const EXPERIENCE: Experience[] = [
   {
     date: 'June 2026 - Present',
-    role: 'Software Engineer Associate',
+    role: 'Startup Associate - Software Engineer',
     company: 'Fulcrum GT',
     logo: 'logos/fulcrum.png',
     photo: '/dakmod-team.png',
@@ -310,23 +310,23 @@ export const EXPERIENCE: Experience[] = [
 
 export const LEADERSHIP: Leadership[] = [
   {
-    role: 'Web Development Team Lead',
-    organization: 'SparkHacks 2026',
-    date: 'July 2025 - February 2026',
-    logo: '/logos/sparkhacks26.svg',
-    groupImage: '/sparkhacks_team26.jpg',
-    imageCaption: 'The SparkHacks 2026 team!',
+    role: 'Event Organizer',
+    organization: 'Vietnamese International Student Association (VISA) at UIC',
+    date: 'January 2025 - July 2025',
+    logo: '/logos/visa.png',
+    groupImage: '/visa_tet.JPG',
+    imageCaption: 'The VISA team, celebrating Once Upon A Tết 2025',
     description: [
-      'For SparkHacks 2026, I stepped into the role of <strong>Web Development Team Lead</strong>, leading the design and development of the website and dashboard system.',
-      'The experience has been nothing short of amazing. I’ve learned so much about project management and leadership, and I’ve had the opportunity to work with the most talented team.',
+      'VISA is a cultural and social organization that aims to connect Vietnamese international students at UIC and promote Vietnamese culture on campus. I served as an <strong>Event Organizer</strong> for the Spring 2025 semester.',
+      'Being part of VISA has been such a rewarding way to connect with fellow students at UIC, some of whom have become my closest friends. From brainstorming event ideas to seeing people come together and have lasting memories, it has truly been a fulfilling experience!',
     ],
     stats: [
-      { num: '700+', subtext: 'dashboard users',  accent: true },
-      { num: '300+', subtext: 'accepted hackers' },
-      { num: '100%', subtext: 'website uptime' },
+      { num: '100+', subtext: 'average participants in major events' },
+      { num: '5+', subtext: 'total events hosted' },
+      { num: '$2,000+', subtext: 'fundraised',  accent: true },
     ],
   },
-  {
+    {
     role: 'Logistics Organizer',
     organization: 'SparkHacks 2025',
     date: 'August 2024 - February 2025',
@@ -344,20 +344,20 @@ export const LEADERSHIP: Leadership[] = [
     ],
   },
   {
-    role: 'Event Organizer',
-    organization: 'Vietnamese International Student Association (VISA) at UIC',
-    date: 'January 2025 - July 2025',
-    logo: '/logos/visa.png',
-    groupImage: '/visa_tet.JPG',
-    imageCaption: 'The VISA team, celebrating Once Upon A Tết 2025',
+    role: 'Web Development Team Lead',
+    organization: 'SparkHacks 2026',
+    date: 'July 2025 - February 2026',
+    logo: '/logos/sparkhacks26.svg',
+    groupImage: '/sparkhacks_team26.jpg',
+    imageCaption: 'The SparkHacks 2026 team!',
     description: [
-      'VISA is a cultural and social organization that aims to connect Vietnamese international students at UIC and promote Vietnamese culture on campus. I served as an <strong>Event Organizer</strong> for the Spring 2025 semester.',
-      'Being part of VISA has been such a rewarding way to connect with fellow students at UIC, some of whom have become my closest friends. From brainstorming event ideas to seeing people come together and have lasting memories, it has truly been a fulfilling experience!',
+      'For SparkHacks 2026, I stepped into the role of <strong>Web Development Team Lead</strong>, leading the design and development of the website and dashboard system.',
+      'The experience has been nothing short of amazing. I’ve learned so much about project management and leadership, and I’ve had the opportunity to work with the most talented team.',
     ],
     stats: [
-      { num: '100+', subtext: 'average participants in major events' },
-      { num: '5+', subtext: 'total events hosted' },
-      { num: '$2,000+', subtext: 'fundraised',  accent: true },
+      { num: '700+', subtext: 'dashboard users',  accent: true },
+      { num: '300+', subtext: 'accepted hackers' },
+      { num: '100%', subtext: 'website uptime' },
     ],
   },
 ];
