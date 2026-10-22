@@ -5,6 +5,8 @@
  */
 import DesignLayout from '../layouts/DesignLayout.astro';
 import WordCloud from '../components/WordCloud.astro';
+import SplitText from '../components/SplitText.astro';
+import BlurText from '../components/BlurText.astro';
 import heroBg from '../assets/new-bg.gif';
 
 // `accent` names one of the `--cat-*` design tokens, not a literal.
@@ -75,9 +77,19 @@ const rows = [
       <div class="hero-scrim"></div>
 
       <div class="hero-inner" data-hero-inner>
-        <h1 class="hero-name">Nathan Trinh</h1>
+        <h1 class="hero-name">
+          <SplitText
+            text="Nathan Trinh"
+            trigger="load"
+            playWhen="play-hero-intro"
+            startDelay={0.8}
+            hoverEffect="lift"
+          />
+        </h1>
         <p class="hero-sub">
-          Building software for <span class="hl-1">the greater good of people</span>.
+          <BlurText trigger="load" playWhen="play-hero-intro" startDelay={2.5} delay={120}>
+            Building software for <span class="hl-1">the greater good of people</span>.
+          </BlurText>
         </p>
         <div class="hero-cta">
           <a class="cta cta-primary" href="/Nathan_Trinh_resume.pdf" target="_blank" rel="noopener noreferrer">
@@ -328,9 +340,8 @@ const rows = [
   /* The hero introduces itself one line at a time. `backwards` holds the
      from-state through the delay so nothing flashes on screen before its
      turn. Gated on the class the inline script sets, so the stagger plays on
-     arrival but not when the nav brings you back here. */
-  :global(html.play-hero-intro) .hero-name,
-  :global(html.play-hero-intro) .hero-sub,
+     arrival but not when the nav brings you back here. The name (SplitText) and
+     subtitle (BlurText) run their own reveals, gated on the same class. */
   :global(html.play-hero-intro) .hero-cta {
     animation: hero-in 2s var(--ease-out-soft) backwards;
   }
@@ -338,9 +349,7 @@ const rows = [
   /* The delays have to live on the gated selector too. As bare `.hero-name`
      rules they lost to the shorthand above, which resets `animation-delay` to
      zero and outranks them — every line then faded in at once. */
-  :global(html.play-hero-intro) .hero-name { animation-delay: 0.8s; }
-  :global(html.play-hero-intro) .hero-sub { animation-delay: 2s; }
-  :global(html.play-hero-intro) .hero-cta { animation-delay: 3.5s; }
+  :global(html.play-hero-intro) .hero-cta { animation-delay: 4.5s; }
 
   @keyframes hero-in {
     from { opacity: 0; transform: translateY(18px); }
@@ -646,8 +655,6 @@ const rows = [
     }
 
     /* Keep the staggered entrance, but as a plain fade with no travel. */
-    .hero-name,
-    .hero-sub,
     .hero-cta {
       animation-name: hero-in-fade;
     }

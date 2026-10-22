@@ -1,0 +1,466 @@
+---
+/**
+ * Text whose words (or letters) blur into focus one after another.
+ * An Astro port of React Bits' <BlurText />, animated with Motion.
+ *
+ * Unlike the original it animates whatever markup is slotted in, so inline
+ * highlights and their (scoped) styles survive the split:
+ *
+ *   <p><BlurText>Some <span class="hl">copy</span>.</BlurText></p>
+ */
+interface Props {
+  effect?: 'blur' | 'zoom' | 'tilt' | 'focus' | 'drift';
+  animateBy?: 'words' | 'letters';
+  direction?: 'top' | 'bottom' | 'left' | 'right';
+  staggerFrom?: 'start' | 'center' | 'end' | 'random';
+  trigger?: 'view' | 'load' | 'hover' | 'click';
+  /** Stagger between pieces, in ms. */
+  delay?: number;
+  stepDuration?: number;
+  loop?: boolean;
+  loopDelay?: number;
+  blur?: number;
+  distance?: number;
+  fromColor?: string;
+  focusOnHover?: boolean;
+  threshold?: number;
+  rootMargin?: string;
+  /** Seconds to wait before the first reveal. */
+  startDelay?: number;
+  /**
+   * Only play the first reveal while <html> has this class; otherwise the
+   * text simply appears (hover / click / loop still work).
+   */
+  playWhen?: string;
+  class?: string;
+}
+
+const {
+  effect = 'blur',
+  animateBy = 'words',
+  direction = 'top',
+  staggerFrom = 'start',
+  trigger = 'view',
+  delay = 200,
+  stepDuration = 0.35,
+  loop = false,
+  loopDelay = 2,
+  blur = 10,
+  distance = 50,
+  fromColor,
+  focusOnHover = false,
+  threshold = 0.1,
+  rootMargin = '0px',
+  startDelay = 0,
+  playWhen,
+  class: className = '',
+} = Astro.props;
+
+const config = {
+  effect,
+  animateBy,
+  direction,
+  staggerFrom,
+  trigger,
+  delay,
+  stepDuration,
+  loop,
+  loopDelay,
+  blur,
+  distance,
+  fromColor: fromColor ?? null,
+  focusOnHover,
+  threshold,
+  rootMargin,
+  startDelay,
+  playWhen: playWhen ?? null,
+};
+---
+
+<span
+  class:list={['blur-text', className, { 'is-clickable': trigger === 'click' }]}
+  data-blur-text={JSON.stringify(config)}
+><slot /></span>
+<noscript>
+  <style is:inline>.blur-text { visibility: visible !important; }</style>
+</noscript>
+
+<style>
+  .blur-text {
+    visibility: hidden;
+  }
+
+  .blur-text.is-ready {
+    visibility: visible;
+  }
+
+  .blur-text.is-clickable {
+    cursor: pointer;
+  }
+
+  .blur-text :global(.blur-text__sr) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Letters of one word stay together so lines only break between words. */
+  .blur-text :global(.blur-text__word) {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .blur-text :global(.blur-text__piece) {
+    display: inline-block;
+    will-change: transform, filter, opacity;
+  }
+</style>
+
+<script>
+  import { animate } from 'motion';
+  import { prefersReducedMotion } from '../lib/scroll';
+
+  type Config = {
+    effect: 'blur' | 'zoom' | 'tilt' | 'focus' | 'drift';
+    animateBy: 'words' | 'letters';
+    direction: 'top' | 'bottom' | 'left' | 'right';
+    staggerFrom: 'start' | 'center' | 'end' | 'random';
+    trigger: 'view' | 'load' | 'hover' | 'click';
+    delay: number;
+    stepDuration: number;
+    loop: boolean;
+    loopDelay: number;
+    blur: number;
+    distance: number;
+    fromColor: string | null;
+    focusOnHover: boolean;
+    threshold: number;
+    rootMargin: string;
+    startDelay: number;
+    playWhen: string | null;
+  };
+
+  type Frame = Record<string, number | string>;
+  type Bezier = [number, number, number, number];
+  type Effect = {
+    from: Frame;
+    rest: Frame;
+    exit: Frame;
+    fade: Bezier | 'linear';
+    bounce: number | null;
+    settle: number;
+    exitEase: Bezier;
+    origin?: string;
+  };
+
+  const AXES = { top: ['y', -1], bottom: ['y', 1], left: ['x', -1], right: ['x', 1] } as const;
+  const EASE_OUT: Bezier = [0.33, 1, 0.68, 1];
+  const EASE_IN_OUT: Bezier = [0.65, 0, 0.35, 1];
+  const EASE_IN: Bezier = [0.55, 0, 0.9, 0.45];
+  const CSS_EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+  const MOVE_KEYS = ['x', 'y', 'scale', 'rotateX', 'rotateY', 'skewX'];
+
+  const blurTo = (px: number) => `blur(${Math.max(0, px)}px)`;
+
+  // The original's middle keyframes only apply to custom keyframes, so each
+  // effect boils down to from → rest, plus an exit pose for replays.
+  function buildEffect(effect: Config['effect'], direction: Config['direction'], blur: number, d: number): Effect {
+    const [axis, sign] = AXES[direction] || AXES.top;
+    const b = Math.max(0, blur);
+
+    if (effect === 'zoom') {
+      return {
+        from: { filter: blurTo(b * 1.2), opacity: 0, scale: 1.4, [axis]: sign * d * 0.35 },
+        rest: { filter: blurTo(0), opacity: 1, scale: 1, [axis]: 0 },
+        exit: { filter: blurTo(b), opacity: 0, scale: 0.82, [axis]: -sign * d * 0.2 },
+        fade: EASE_OUT,
+        bounce: 0.25,
+        settle: 0.5,
+        exitEase: EASE_IN,
+      };
+    }
+
+    if (effect === 'tilt') {
+      const rotate = axis === 'y' ? 'rotateX' : 'rotateY';
+      const lean = axis === 'y' ? -sign : sign;
+      const originX = axis === 'x' ? (sign < 0 ? '0%' : '100%') : '50%';
+      const originY = axis === 'y' ? (sign < 0 ? '0%' : '100%') : '50%';
+      return {
+        from: { filter: blurTo(b), opacity: 0, [rotate]: lean * 55, [axis]: sign * d * 0.5, transformPerspective: 600 },
+        rest: { filter: blurTo(0), opacity: 1, [rotate]: 0, [axis]: 0, transformPerspective: 600 },
+        exit: { filter: blurTo(b), opacity: 0, [rotate]: -lean * 40, [axis]: -sign * d * 0.3, transformPerspective: 600 },
+        fade: EASE_OUT,
+        bounce: 0.3,
+        settle: 0.8,
+        exitEase: EASE_IN,
+        origin: `${originX} ${originY}`,
+      };
+    }
+
+    if (effect === 'focus') {
+      const soft = { filter: blurTo(b * 1.4), opacity: 0.32, scale: 1.12 };
+      return {
+        from: soft,
+        rest: { filter: blurTo(0), opacity: 1, scale: 1 },
+        exit: soft,
+        fade: EASE_IN_OUT,
+        bounce: null,
+        settle: 1,
+        exitEase: EASE_IN_OUT,
+      };
+    }
+
+    if (effect === 'drift') {
+      const h = direction === 'right' ? 1 : -1;
+      const v = axis === 'y' ? sign : 0;
+      return {
+        from: { filter: blurTo(b), opacity: 0, x: h * d * 1.6, y: v * d * 0.3, skewX: h * 28 },
+        rest: { filter: blurTo(0), opacity: 1, x: 0, y: 0, skewX: 0 },
+        exit: { filter: blurTo(b), opacity: 0, x: -h * d * 1.2, y: -v * d * 0.2, skewX: h * 20 },
+        fade: EASE_OUT,
+        bounce: 0.3,
+        settle: 0.55,
+        exitEase: EASE_IN,
+      };
+    }
+
+    return {
+      from: { filter: blurTo(b), opacity: 0, [axis]: sign * d },
+      rest: { filter: blurTo(0), opacity: 1, [axis]: 0 },
+      exit: { filter: blurTo(b), opacity: 0, [axis]: -sign * d * 0.6 },
+      fade: 'linear',
+      bounce: 0.35,
+      settle: 0.5,
+      exitEase: EASE_IN,
+    };
+  }
+
+  // Reduced motion keeps the blur and fade but drops every transform.
+  const stillOnly = (frame: Frame): Frame =>
+    Object.fromEntries(Object.entries(frame).filter(([key]) => !MOVE_KEYS.includes(key) && key !== 'transformPerspective'));
+
+  function buildRanks(count: number, staggerFrom: Config['staggerFrom'], seedText: string) {
+    const ranks = Array.from({ length: count }, (_, i) => i);
+    if (staggerFrom === 'end') return ranks.map((i) => count - 1 - i);
+    if (staggerFrom === 'center') {
+      const mid = (count - 1) / 2;
+      const offset = count % 2 === 0 ? 0.5 : 0;
+      return ranks.map((i) => Math.abs(i - mid) - offset);
+    }
+    if (staggerFrom === 'random') {
+      let seed = 2166136261;
+      for (let i = 0; i < seedText.length; i++) seed = Math.imul(seed ^ seedText.charCodeAt(i), 16777619) >>> 0;
+      const next = () => {
+        seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+        return seed / 4294967296;
+      };
+      const order = ranks.slice();
+      for (let i = order.length - 1; i > 0; i--) {
+        const j = Math.floor(next() * (i + 1));
+        [order[i], order[j]] = [order[j], order[i]];
+      }
+      order.forEach((piece, rank) => {
+        ranks[piece] = rank;
+      });
+    }
+    return ranks;
+  }
+
+  /**
+   * Wraps every word of the root's text nodes in place (letters mode wraps
+   * each letter inside its word), leaving inline elements around them intact.
+   */
+  function split(root: HTMLElement, byLetters: boolean) {
+    const pieces: HTMLElement[] = [];
+    const words: HTMLElement[][] = [];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes: Text[] = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode as Text);
+
+    for (const node of nodes) {
+      const fragment = document.createDocumentFragment();
+      for (const part of (node.data.match(/\s+|\S+/g) || [])) {
+        if (/^\s/.test(part)) {
+          fragment.append(' ');
+          continue;
+        }
+        const piece = (content: string) => {
+          const span = document.createElement('span');
+          span.className = 'blur-text__piece';
+          span.textContent = content;
+          pieces.push(span);
+          return span;
+        };
+        if (byLetters) {
+          const word = document.createElement('span');
+          word.className = 'blur-text__word';
+          word.append(...Array.from(part).map(piece));
+          fragment.append(word);
+          words.push(Array.from(word.children) as HTMLElement[]);
+        } else {
+          const span = piece(part);
+          fragment.append(span);
+          words.push([span]);
+        }
+      }
+      node.replaceWith(fragment);
+    }
+    return { pieces, words };
+  }
+
+  function mount(root: HTMLElement) {
+    const c: Config = JSON.parse(root.dataset.blurText!);
+    const reduced = prefersReducedMotion();
+    const plays = !c.playWhen || document.documentElement.classList.contains(c.playWhen);
+    const text = root.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+
+    // Screen readers get one clean copy instead of a stream of fragments.
+    const content = document.createElement('span');
+    content.setAttribute('aria-hidden', 'true');
+    content.append(...Array.from(root.childNodes));
+    const label = document.createElement('span');
+    label.className = 'blur-text__sr';
+    label.textContent = text;
+    root.append(label, content);
+
+    const { pieces, words } = split(content, c.animateBy === 'letters');
+    if (!pieces.length) return;
+
+    const fx = buildEffect(c.effect, c.direction, c.blur, c.distance);
+    const from = reduced ? stillOnly(fx.from) : fx.from;
+    const rest = reduced ? stillOnly(fx.rest) : fx.rest;
+    const exit = reduced ? stillOnly(fx.exit) : fx.exit;
+
+    const totalDuration = c.stepDuration * 2;
+    const stagger = Math.max(0, c.delay) / 1000;
+    const exitDuration = c.stepDuration * 1.3;
+    const exitStagger = stagger * 0.4;
+    const ranks = buildRanks(pieces.length, c.staggerFrom, text);
+    const maxRank = Math.max(0, ...ranks);
+    const inTotal = (totalDuration * Math.max(1, fx.settle * 2.2) + maxRank * stagger) * 1000;
+    const outTotal = (exitDuration + maxRank * exitStagger) * 1000;
+
+    if (fx.origin) pieces.forEach((piece) => (piece.style.transformOrigin = fx.origin!));
+
+    let phase: 'from' | 'in' | 'rest' | 'out' = 'from';
+    let settled = false;
+    let timer = 0;
+
+    const setPose = (frame: Frame) => pieces.forEach((piece) => animate(piece, frame, { duration: 0 }));
+
+    const tint = (on: boolean, duration: number, delayFor: (rank: number) => number) => {
+      if (!c.fromColor) return;
+      pieces.forEach((piece, i) => {
+        piece.style.transition = duration ? `color ${duration}s ${CSS_EASE} ${delayFor(ranks[i])}s` : 'none';
+        piece.style.color = on ? c.fromColor! : '';
+      });
+    };
+
+    const holdThenLoop = () => {
+      if (c.loop) timer = window.setTimeout(() => go('out'), Math.max(0, c.loopDelay) * 1000);
+    };
+
+    function go(next: typeof phase) {
+      window.clearTimeout(timer);
+      phase = next;
+
+      if (next === 'in') {
+        settled = false;
+        pieces.forEach((piece, i) => {
+          const delayed = ranks[i] * stagger;
+          const keyframes = Object.fromEntries(Object.keys(rest).map((key) => [key, [from[key], rest[key]]]));
+          const transition: Record<string, unknown> = { duration: totalDuration, delay: delayed, ease: fx.fade };
+          if (fx.bounce !== null) {
+            const move = { type: 'spring', visualDuration: totalDuration * fx.settle, bounce: fx.bounce, delay: delayed };
+            for (const key of MOVE_KEYS) if (key in rest) transition[key] = move;
+          }
+          animate(piece, keyframes, transition);
+        });
+        tint(false, totalDuration * 0.9, (rank) => rank * stagger);
+        timer = window.setTimeout(() => {
+          settled = true;
+          holdThenLoop();
+        }, inTotal);
+      } else if (next === 'out') {
+        settled = false;
+        pieces.forEach((piece, i) =>
+          animate(piece, exit, { duration: exitDuration, ease: fx.exitEase, delay: ranks[i] * exitStagger }),
+        );
+        tint(true, exitDuration, (rank) => rank * exitStagger);
+        timer = window.setTimeout(() => go('in'), outTotal);
+      } else if (next === 'rest') {
+        setPose(rest);
+        tint(false, 0, () => 0);
+        settled = true;
+        holdThenLoop();
+      } else {
+        setPose(from);
+        tint(true, 0, () => 0);
+      }
+    }
+
+    const replay = () => {
+      if (settled) go('out');
+    };
+
+    const interactive = c.trigger === 'hover' || c.trigger === 'click';
+    go(interactive || !plays ? 'rest' : 'from');
+    root.classList.add('is-ready');
+
+    if (phase === 'from') {
+      const start = () => window.setTimeout(() => go('in'), c.startDelay * 1000);
+      if (c.trigger === 'load') {
+        start();
+      } else {
+        const observer = new IntersectionObserver(
+          ([entry]) => {
+            if (!entry.isIntersecting) return;
+            observer.disconnect();
+            start();
+          },
+          { threshold: c.threshold, rootMargin: c.rootMargin },
+        );
+        observer.observe(root);
+      }
+    }
+
+    if (c.trigger === 'hover') root.addEventListener('pointerenter', replay);
+    if (c.trigger === 'click') root.addEventListener('click', replay);
+
+    if (c.focusOnHover) {
+      const dim = Math.min(6, Math.max(2, c.blur * 0.3));
+      // In words mode each word is a single piece, so dim the piece's parent
+      // wrapper rather than the piece Motion is animating.
+      const targets = words.map((group) => (c.animateBy === 'letters' ? group[0].parentElement! : wrap(group[0])));
+      targets.forEach((target) => {
+        target.style.transition = `filter 0.45s ${CSS_EASE}, opacity 0.45s ${CSS_EASE}`;
+        target.addEventListener('pointerenter', () =>
+          targets.forEach((other) => {
+            const dimmed = other !== target;
+            other.style.filter = dimmed ? `blur(${dim}px)` : '';
+            other.style.opacity = dimmed ? '0.3' : '';
+          }),
+        );
+        target.addEventListener('pointerleave', () =>
+          targets.forEach((other) => {
+            other.style.filter = '';
+            other.style.opacity = '';
+          }),
+        );
+      });
+    }
+  }
+
+  function wrap(piece: HTMLElement) {
+    const word = document.createElement('span');
+    word.className = 'blur-text__word';
+    piece.replaceWith(word);
+    word.append(piece);
+    return word;
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-blur-text]').forEach(mount);
+</script>

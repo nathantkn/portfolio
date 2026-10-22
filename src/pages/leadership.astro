@@ -1,5 +1,6 @@
 ---
 import DesignLayout from '../layouts/DesignLayout.astro';
+import StrokeText from '../components/StrokeText.astro';
 import LeadershipSection from '../components/LeadershipSection.astro';
 import { LEADERSHIP } from '../data/portfolio';
 ---
@@ -11,7 +12,7 @@ import { LEADERSHIP } from '../data/portfolio';
 >
   <header class="shell hero">
     <div class="hero-row">
-      <h1 class="d-h1 hero-title" data-hero>My<br /><em>leadership roles</em></h1>
+      <h1 class="d-h1 hero-title" data-hero>My<br /><em><StrokeText text="leadership roles" strokeColor="var(--accent-hover)" /></em></h1>
     </div>
     <div class="meta">
       <span>The 3 teams I helped lead throughout my time at UIC</span>

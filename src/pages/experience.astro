@@ -1,5 +1,6 @@
 ---
 import DesignLayout from '../layouts/DesignLayout.astro';
+import StrokeText from '../components/StrokeText.astro';
 import TimelineEntry from '../components/TimelineEntry.astro';
 import { EXPERIENCE } from '../data/portfolio';
 import {
@@ -55,7 +56,7 @@ const stats = [
 
   <header class="shell hero">
     <div class="hero-row">
-      <h1 class="d-h1 hero-title" data-hero>My<br /><em>work experience</em></h1>
+      <h1 class="d-h1 hero-title" data-hero>My<br /><em><StrokeText text="work experience" strokeColor="var(--accent-hover)" /></em></h1>
     </div>
     <div class="stats" data-reveal>
       {

@@ -1,0 +1,202 @@
+---
+/**
+ * Hand-drawn heading: each glyph's outline draws on, then the fill wipes in.
+ * An Astro port of React Bits' <StrokeText /> (solid stroke, wipe fill).
+ *
+ * The SVG is laid out in `em`s of the surrounding text, so it follows the
+ * parent's fluid font-size and inherits its family, weight and style.
+ */
+interface Props {
+  text: string;
+  strokeColor?: string;
+  fillColor?: string;
+  /** In 1/100ths of an em. */
+  strokeWidth?: number;
+  drawDuration?: number;
+  fillDelay?: number;
+  stagger?: number;
+  ease?: string;
+  wipeFrom?: 'left' | 'right' | 'top' | 'bottom';
+  letterSpacing?: string;
+  hoverRedraw?: boolean;
+}
+
+const {
+  text,
+  strokeColor = 'currentColor',
+  fillColor = 'currentColor',
+  strokeWidth = 1.2,
+  drawDuration = 1.6,
+  fillDelay = 0.2,
+  stagger = 0.05,
+  ease = 'power2.out',
+  wipeFrom = 'left',
+  letterSpacing = '-0.01em',
+  hoverRedraw = true,
+} = Astro.props;
+
+const chars = Array.from(text);
+const clipId = `stroke-text-${Math.random().toString(36).slice(2, 10)}`;
+---
+
+<span
+  class="stroke-text"
+  data-stroke-text
+  data-draw={drawDuration}
+  data-fill-delay={fillDelay}
+  data-stagger={stagger}
+  data-ease={ease}
+  data-wipe-from={wipeFrom}
+  data-hover-redraw={hoverRedraw ? '' : undefined}
+  style={`--stroke-text-color: ${strokeColor}; --stroke-text-fill: ${fillColor}; --stroke-text-spacing: ${letterSpacing};`}
+>
+  <span class="stroke-text__label">{text}</span>
+  <svg class="stroke-text__svg" aria-hidden="true" style={`width: ${chars.length * 0.45}em; height: 1em;`}>
+    <defs>
+      <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
+        <rect data-wipe width="0" height="0"></rect>
+      </clipPath>
+    </defs>
+    <text class="stroke-text__stroke" data-outline stroke-width={strokeWidth}>
+      {chars.map((char) => <tspan data-stroke-char>{char}</tspan>)}
+    </text>
+    <text class="stroke-text__fill" clip-path={`url(#${clipId})`}>
+      {chars.map((char) => <tspan>{char}</tspan>)}
+    </text>
+  </svg>
+  <noscript>
+    <style is:inline>
+      .stroke-text__svg { display: none !important; }
+      .stroke-text__label { position: static !important; clip-path: none !important; width: auto !important; height: auto !important; }
+    </style>
+  </noscript>
+</span>
+
+<style>
+  .stroke-text {
+    position: relative;
+    display: inline-block;
+  }
+
+  /* Real text for screen readers, search and no-JS; the SVG is decorative. */
+  .stroke-text__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .stroke-text__svg {
+    display: inline-block;
+    overflow: visible;
+    visibility: hidden;
+  }
+
+  .stroke-text.is-ready .stroke-text__svg {
+    visibility: visible;
+  }
+
+  .stroke-text__svg text {
+    /* User units: 100 = 1em of the parent once the viewBox is fitted. */
+    font-size: 100px;
+    letter-spacing: var(--stroke-text-spacing);
+    user-select: none;
+  }
+
+  .stroke-text__stroke {
+    fill: none;
+    stroke: var(--stroke-text-color);
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .stroke-text__fill {
+    fill: var(--stroke-text-fill);
+    stroke: none;
+  }
+
+  [data-hover-redraw] {
+    cursor: default;
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { prefersReducedMotion } from '../lib/scroll';
+
+  // Matches the 100px user-unit font-size in the styles above.
+  const BASE = 100;
+  // Longer than any single glyph's outline, so each starts fully hidden.
+  const DASH = BASE * 8;
+
+  type Box = { x: number; y: number; width: number; height: number };
+
+  function wipeFrames(box: Box, from: string): { start: Box; end: Box } {
+    const end = { ...box };
+    if (from === 'right') return { start: { ...end, x: box.x + box.width, width: 0 }, end };
+    if (from === 'top') return { start: { ...end, height: 0 }, end };
+    if (from === 'bottom') return { start: { ...end, y: box.y + box.height, height: 0 }, end };
+    return { start: { ...end, width: 0 }, end };
+  }
+
+  function init(root: HTMLElement) {
+    const svg = root.querySelector<SVGSVGElement>('svg')!;
+    const outline = root.querySelector<SVGTextElement>('[data-outline]')!;
+    const wipe = root.querySelector<SVGRectElement>('[data-wipe]')!;
+    const strokes = root.querySelectorAll<SVGTSpanElement>('[data-stroke-char]');
+
+    const bbox = outline.getBBox();
+    if (!bbox.width) return;
+
+    // Fit the SVG tightly to the glyphs and sit it on the parent's baseline;
+    // overflow stays visible so the stroke and wipe padding never clip.
+    svg.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
+    svg.style.width = `${bbox.width / BASE}em`;
+    svg.style.height = `${bbox.height / BASE}em`;
+    svg.style.verticalAlign = `${-(bbox.y + bbox.height) / BASE}em`;
+
+    const pad = BASE * 0.1;
+    const box = { x: bbox.x - pad, y: bbox.y - pad, width: bbox.width + pad * 2, height: bbox.height + pad * 2 };
+    const frames = wipeFrames(box, root.dataset.wipeFrom ?? 'left');
+
+    const draw = Number(root.dataset.draw);
+    const fillDelay = Number(root.dataset.fillDelay);
+    const stagger = Number(root.dataset.stagger);
+    const ease = root.dataset.ease ?? 'power2.out';
+    const fillDuration = Math.max(0.4, draw * 0.5);
+
+    root.classList.add('is-ready');
+
+    if (prefersReducedMotion()) {
+      gsap.set(wipe, { attr: frames.end });
+      return;
+    }
+
+    gsap.set(strokes, { strokeDasharray: DASH, strokeDashoffset: DASH });
+    gsap.set(wipe, { attr: frames.start });
+
+    const timeline = gsap
+      .timeline()
+      .to(strokes, { strokeDashoffset: 0, duration: draw, ease, stagger }, 0)
+      .to(wipe, { attr: frames.end, duration: fillDuration, ease: 'power2.inOut' }, draw + fillDelay);
+
+    if (root.dataset.hoverRedraw === undefined) return;
+
+    let redraw: gsap.core.Timeline | null = null;
+    root.addEventListener('pointerenter', () => {
+      if (timeline.progress() < 1 || redraw?.isActive()) return;
+      redraw = gsap
+        .timeline()
+        .to(strokes, { strokeOpacity: 0, duration: 0.2, ease: 'power1.out' })
+        .set(strokes, { strokeDashoffset: DASH, strokeOpacity: 1 })
+        .to(strokes, { strokeDashoffset: 0, duration: draw * 0.8, ease, stagger });
+    });
+  }
+
+  // Glyph metrics are only right once the display face has loaded.
+  document.fonts.ready.then(() => {
+    document.querySelectorAll<HTMLElement>('[data-stroke-text]').forEach(init);
+  });
+</script>

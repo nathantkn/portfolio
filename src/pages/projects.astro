@@ -1,5 +1,6 @@
 ---
 import DesignLayout from '../layouts/DesignLayout.astro';
+import StrokeText from '../components/StrokeText.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import ProjectDetail from '../components/ProjectDetail.astro';
 import { PROJECTS, PROJECT_KINDS } from '../data/portfolio';
@@ -39,7 +40,7 @@ const stats = [
 >
   <header class="shell hero">
     <div class="hero-row">
-      <h1 class="d-h1 hero-title" data-hero>My<br /><span class="dot">shipped projects</span></h1>
+      <h1 class="d-h1 hero-title" data-hero>My<br /><span class="dot"><StrokeText text="shipped projects" strokeColor="var(--accent-hover)" /></span></h1>
     </div>
     <div class="stats" data-reveal>
         {

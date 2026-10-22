@@ -1,0 +1,395 @@
+---
+/**
+ * Text that reveals piece by piece (chars, words or lines) with GSAP's
+ * SplitText plugin, plus optional hover lift / wave springs afterwards.
+ * An Astro port of React Bits' <SplitText />.
+ *
+ * Renders an inline-block span, so wrap it in whatever heading or paragraph
+ * the copy belongs to and style that as usual.
+ */
+interface Props {
+  text: string;
+  effect?: 'rise' | 'fade' | 'blur' | 'flip' | 'pop' | 'skew' | 'wave';
+  trigger?: 'view' | 'load' | 'hover' | 'click';
+  splitType?: 'chars' | 'words' | 'lines' | 'words, chars';
+  /** Stagger between pieces, in ms. */
+  delay?: number;
+  duration?: number;
+  ease?: string;
+  staggerFrom?: 'start' | 'center' | 'end' | 'edges' | 'random';
+  mask?: boolean;
+  loop?: boolean;
+  loopDelay?: number;
+  hoverEffect?: 'none' | 'lift' | 'wave';
+  accentColor?: string;
+  threshold?: number;
+  rootMargin?: string;
+  /** Seconds to wait before the first reveal. */
+  startDelay?: number;
+  /**
+   * Only play the first reveal while <html> has this class; otherwise the
+   * text simply appears (hover effects still work).
+   */
+  playWhen?: string;
+  class?: string;
+}
+
+const {
+  text,
+  effect = 'rise',
+  trigger = 'view',
+  splitType = 'chars',
+  delay = 50,
+  duration = 1.25,
+  ease,
+  staggerFrom = 'start',
+  mask = false,
+  loop = false,
+  loopDelay = 1.5,
+  hoverEffect = 'none',
+  accentColor,
+  threshold = 0.1,
+  rootMargin = '-100px',
+  startDelay = 0,
+  playWhen,
+  class: className = '',
+} = Astro.props;
+
+const config = {
+  effect,
+  trigger,
+  splitType,
+  delay,
+  duration,
+  ease: ease ?? null,
+  staggerFrom,
+  mask,
+  loop,
+  loopDelay,
+  hoverEffect,
+  accentColor: accentColor ?? null,
+  threshold,
+  rootMargin,
+  startDelay,
+  playWhen: playWhen ?? null,
+};
+---
+
+<span
+  class:list={['split-text', className, { 'is-clickable': trigger === 'click' }]}
+  data-split-text={JSON.stringify(config)}
+>{text}</span>
+<noscript>
+  <style is:inline>.split-text { visibility: visible !important; }</style>
+</noscript>
+
+<style>
+  .split-text {
+    display: inline-block;
+    visibility: hidden;
+  }
+
+  .split-text.is-ready {
+    visibility: visible;
+  }
+
+  .split-text.is-clickable {
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { SplitText } from 'gsap/SplitText';
+  import { prefersReducedMotion } from '../lib/scroll';
+
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+
+  type Config = {
+    effect: string;
+    trigger: 'view' | 'load' | 'hover' | 'click';
+    splitType: string;
+    delay: number;
+    duration: number;
+    ease: string | null;
+    staggerFrom: 'start' | 'center' | 'end' | 'edges' | 'random';
+    mask: boolean;
+    loop: boolean;
+    loopDelay: number;
+    hoverEffect: 'none' | 'lift' | 'wave';
+    accentColor: string | null;
+    threshold: number;
+    rootMargin: string;
+    startDelay: number;
+    playWhen: string | null;
+  };
+
+  type Vars = gsap.TweenVars;
+
+  const STIFFNESS = 180;
+  const DAMPING = 19;
+  const KICK = 0.024;
+
+  const waveEase = (t: number) => 1 - Math.cos(t * Math.PI * 1.5) * Math.pow(1 - t, 1.2);
+
+  function getEffect(effect: string, em: number): { from: Vars; to: Vars; ease: string | ((t: number) => number) } {
+    switch (effect) {
+      case 'fade':
+        return { from: { opacity: 0 }, to: { opacity: 1 }, ease: 'power2.inOut' };
+      case 'blur':
+        return {
+          from: { opacity: 0, filter: `blur(${Math.round(em * 1.4) / 10}px)` },
+          to: { opacity: 1, filter: 'blur(0px)' },
+          ease: 'power2.out',
+        };
+      case 'flip': {
+        const setup = { transformPerspective: em * 6, transformOrigin: '50% 100%' };
+        return {
+          from: { ...setup, opacity: 0, rotationX: -90 },
+          to: { ...setup, opacity: 1, rotationX: 0 },
+          ease: 'power3.out',
+        };
+      }
+      case 'pop':
+        return { from: { opacity: 0, scale: 0 }, to: { opacity: 1, scale: 1 }, ease: 'back.out(1.6)' };
+      case 'skew':
+        return {
+          from: { transformOrigin: '50% 100%', opacity: 0, x: -em * 0.4, skewX: -24 },
+          to: { transformOrigin: '50% 100%', opacity: 1, x: 0, skewX: 0 },
+          ease: 'expo.out',
+        };
+      case 'wave':
+        return { from: { opacity: 0, y: em * 0.45 }, to: { opacity: 1, y: 0 }, ease: waveEase };
+      default:
+        return { from: { opacity: 0, y: 40 }, to: { opacity: 1, y: 0 }, ease: 'power3.out' };
+    }
+  }
+
+  // ScrollTrigger start equivalent to an IntersectionObserver threshold + rootMargin.
+  function startFor(threshold: number, rootMargin: string) {
+    const match = /^(-?\d+(?:\.\d+)?)(px|em|rem|%)?$/.exec(rootMargin);
+    const value = match ? parseFloat(match[1]) : 0;
+    const unit = match?.[2] || 'px';
+    const offset = value === 0 ? '' : value < 0 ? `-=${-value}${unit}` : `+=${value}${unit}`;
+    return `top ${(1 - threshold) * 100}%${offset}`;
+  }
+
+  function mount(el: HTMLElement) {
+    const c: Config = JSON.parse(el.dataset.splitText!);
+    const reduced = prefersReducedMotion();
+    const plays = !c.playWhen || document.documentElement.classList.contains(c.playWhen);
+
+    const em = parseFloat(getComputedStyle(el).fontSize) || 16;
+    // Reduced motion keeps the entrance, but as a plain fade with no travel.
+    const look = getEffect(reduced ? 'fade' : c.effect, em);
+    const easing = c.ease || look.ease;
+    const unit = c.splitType.includes('chars') ? 'chars' : c.splitType.includes('words') ? 'words' : 'lines';
+    const exit = Math.max(0.35, c.duration * 0.55);
+    const lift = em * 0.2;
+
+    let pieces: HTMLElement[] = [];
+    let movers: HTMLElement[] = [];
+    const order = gsap.utils.distribute({ each: c.delay / 1000, from: c.staggerFrom });
+    let revealed = !plays;
+    let busy: gsap.core.Timeline | null = null;
+    let queued: gsap.core.Tween | null = null;
+    let raf = 0;
+    let last = 0;
+    let centers: { x: number; y: number }[] | null = null;
+    const springs: { y: number; v: number }[] = [];
+    const kicks: { index: number; velocity: number; at: number }[] = [];
+    const pointer = { x: 0, y: 0, inside: false };
+
+    const reveal = (initial: boolean, vars?: gsap.TimelineVars) => {
+      const tl = gsap.timeline(vars);
+      tl.fromTo(
+        pieces,
+        { ...look.from, willChange: 'transform, opacity' },
+        { ...look.to, duration: c.duration, ease: easing, stagger: order, immediateRender: initial },
+        0,
+      );
+      if (c.accentColor) {
+        tl.fromTo(
+          pieces,
+          { color: c.accentColor },
+          {
+            color: getComputedStyle(el).color,
+            duration: c.duration * 0.7,
+            ease: 'power1.inOut',
+            stagger: order,
+            immediateRender: initial,
+          },
+          c.duration * 0.3,
+        );
+      }
+      tl.set(pieces, { clearProps: `transform,filter,willChange${c.accentColor ? ',color' : ''}` });
+      return tl;
+    };
+
+    const conceal = () => {
+      const tl = gsap.timeline();
+      tl.fromTo(
+        pieces,
+        { ...look.to, willChange: 'transform, opacity' },
+        { ...look.from, duration: exit, ease: 'power2.in', stagger: order, immediateRender: false },
+        0,
+      );
+      if (c.accentColor) tl.to(pieces, { color: c.accentColor, duration: exit, ease: 'power1.in', stagger: order }, 0);
+      return tl;
+    };
+
+    const queue = () => {
+      queued?.kill();
+      queued = c.loop && !reduced ? gsap.delayedCall(c.loopDelay, cycle) : null;
+    };
+
+    function cycle() {
+      if (busy || !revealed || !pieces.length) return;
+      queued?.kill();
+      queued = null;
+      busy = gsap
+        .timeline({
+          onComplete: () => {
+            busy = null;
+            queue();
+          },
+        })
+        .add(conceal(), 0)
+        .add(reveal(false), exit);
+    }
+
+    const measure = () => {
+      const box = el.getBoundingClientRect();
+      centers = movers.map((node, i) => {
+        const rect = node.getBoundingClientRect();
+        return {
+          x: rect.left + rect.width / 2 - box.left,
+          y: rect.top + rect.height / 2 - box.top - (springs[i]?.y || 0),
+        };
+      });
+    };
+
+    const tick = (now: number) => {
+      raf = 0;
+      const dt = Math.min(0.032, Math.max(0.001, (now - last) / 1000));
+      last = now;
+      const spots = c.hoverEffect === 'lift' && pointer.inside && revealed ? centers : null;
+      const radius = em * 1.15;
+      let moving = false;
+      for (let k = kicks.length - 1; k >= 0; k--) {
+        if (now < kicks[k].at) continue;
+        const spring = springs[kicks[k].index];
+        if (spring) spring.v -= kicks[k].velocity;
+        kicks.splice(k, 1);
+      }
+      movers.forEach((node, i) => {
+        const spring = springs[i] || (springs[i] = { y: 0, v: 0 });
+        const spot = spots?.[i];
+        let target = 0;
+        if (spot) {
+          const dx = (spot.x - pointer.x) / radius;
+          const dy = (spot.y - pointer.y) / (radius * 1.4);
+          target = -lift * Math.exp(-(dx * dx + dy * dy) * 0.5);
+        }
+        spring.v += (STIFFNESS * (target - spring.y) - DAMPING * spring.v) * dt;
+        spring.y += spring.v * dt;
+        if (Math.abs(target - spring.y) < 0.02 && Math.abs(spring.v) < 0.05) {
+          spring.y = target;
+          spring.v = 0;
+        } else {
+          moving = true;
+        }
+        node.style.translate = Math.abs(spring.y) > 0.01 ? `0 ${spring.y.toFixed(2)}px` : '';
+      });
+      if (moving || kicks.length) raf = requestAnimationFrame(tick);
+    };
+
+    const wake = () => {
+      if (raf) return;
+      last = performance.now();
+      raf = requestAnimationFrame(tick);
+    };
+
+    const locate = (e: PointerEvent) => {
+      const box = el.getBoundingClientRect();
+      pointer.x = e.clientX - box.left;
+      pointer.y = e.clientY - box.top;
+    };
+
+    const springsOn = c.hoverEffect !== 'none' && !reduced;
+
+    el.addEventListener('pointerenter', (e) => {
+      locate(e);
+      pointer.inside = true;
+      if (!revealed) return;
+      if (c.trigger === 'hover') cycle();
+      if (!springsOn) return;
+      measure();
+      if (c.hoverEffect === 'wave') {
+        const now = performance.now();
+        const speed = em * 9;
+        const velocity = (em * 0.16) / KICK;
+        centers!.forEach((center, index) => {
+          kicks.push({ index, velocity, at: now + (Math.abs(center.x - pointer.x) / speed) * 1000 });
+        });
+      }
+      wake();
+    });
+
+    el.addEventListener('pointermove', (e) => {
+      locate(e);
+      pointer.inside = true;
+      if (!revealed || !springsOn || c.hoverEffect !== 'lift') return;
+      if (!centers) measure();
+      wake();
+    });
+
+    el.addEventListener('pointerleave', () => {
+      pointer.inside = false;
+      wake();
+    });
+
+    el.addEventListener('click', () => {
+      if (c.trigger === 'click') cycle();
+    });
+
+    new SplitText(el, {
+      type: c.splitType,
+      smartWrap: true,
+      autoSplit: c.splitType === 'lines',
+      mask: c.mask ? unit : undefined,
+      linesClass: 'split-line',
+      wordsClass: 'split-word',
+      charsClass: 'split-char',
+      reduceWhiteSpace: false,
+      onSplit: (self) => {
+        pieces = ([self[unit], self.chars, self.words, self.lines].find((list) => list.length) || []) as HTMLElement[];
+        movers = (c.mask && self.masks?.length === pieces.length ? self.masks : pieces) as HTMLElement[];
+        centers = null;
+        springs.length = 0;
+        kicks.length = 0;
+        if (revealed) return undefined;
+        busy = reveal(true, {
+          delay: c.startDelay,
+          scrollTrigger:
+            c.trigger === 'load' ? undefined : { trigger: el, start: startFor(c.threshold, c.rootMargin), once: true },
+          onComplete: () => {
+            revealed = true;
+            busy = null;
+            queue();
+          },
+        });
+        return busy;
+      },
+    });
+
+    el.classList.add('is-ready');
+    if (revealed) queue();
+  }
+
+  // Splitting before the webfont lands would measure the fallback face.
+  document.fonts.ready.then(() => {
+    document.querySelectorAll<HTMLElement>('[data-split-text]').forEach(mount);
+  });
+</script>
